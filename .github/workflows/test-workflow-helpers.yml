@@ -22,26 +22,11 @@ jobs:
         with:
           poetry-version: 1.0
 
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v1
-        id: cache
-        with:
-          path: ~/.virtualenvs
-          key: poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            poetry-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Set Poetry config
-        run: |
-          poetry config settings.virtualenvs.in-project false
-          poetry config settings.virtualenvs.path ~/.virtualenvs
-
       - name: Install Dependencies
-        working-directory: workflow-helpers
+        working-directory: canvas-workflow-helpers
         run: poetry install
-        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Test with pytest
-        working-directory: workflow-helpers
+        working-directory: canvas-workflow-helpers
         run: |
           poetry run pytest --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
