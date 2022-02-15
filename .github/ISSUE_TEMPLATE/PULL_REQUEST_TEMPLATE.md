@@ -3,7 +3,7 @@
 - Fill out the template below. Any pull request that does not include enough information to be reviewed in a timely manner may be closed at the maintainers' discretion.
 - The pull request must contribute a change that would be helpful to your own workflow or potentially another Canvas medical user.
 - The pull request must update the test suite to exercise the updated functionality.
-- After you create the pull request, all status checks must be pass before a maintainer reviews your contribution.
+- After you create the pull request, all status checks must pass before a maintainer reviews your contribution.
 
 ### Description of the Change
 
