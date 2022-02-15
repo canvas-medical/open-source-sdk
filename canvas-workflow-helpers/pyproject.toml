@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "canvas-workflow-helpers"
+version = "0.1.0"
+description = "An open source project to empower customization of your Canvas instance using canvas-workflow-kit"
+authors = ["Canvas Team <engineering@canvasmedical.com>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+canvas-workflow-kit = "^0.4.5"
+arrow = "^1.2.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+pytest-cov = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
