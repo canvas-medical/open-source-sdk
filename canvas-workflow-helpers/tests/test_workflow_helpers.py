@@ -1,4 +1,4 @@
-from workflow_helpers import __version__
+from canvas_workflow_helpers import __version__
 
 
 def test_version():

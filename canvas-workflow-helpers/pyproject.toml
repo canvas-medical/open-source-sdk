@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "workflow-helpers"
+name = "canvas-workflow-helpers"
 version = "0.1.0"
 description = "An open source project to empower customization of your Canvas instance using canvas-workflow-kit"
 authors = ["Canvas Team <engineering@canvasmedical.com>"]
@@ -8,7 +8,7 @@ authors = ["Canvas Team <engineering@canvasmedical.com>"]
 python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^6.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
