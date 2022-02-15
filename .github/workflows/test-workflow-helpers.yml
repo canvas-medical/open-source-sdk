@@ -1,9 +1,6 @@
 name: GitHub Actions Demo
 on:
   pull_request:
-    paths-ignore:
-      # Don't bother building if we're only updating the changelog.
-      - /**/*.md
     branches:
       - "**"
 
@@ -27,8 +24,10 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
 
       - name: Install dependencies
+        working-directory: workflow-helpers
         run: |
           poetry install
       - name: Test with pytest
+        working-directory: workflow-helpers
         run: |
           poetry run pytest --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
