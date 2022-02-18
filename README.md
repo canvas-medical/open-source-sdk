@@ -1,4 +1,4 @@
-## Welcome to Canvas Medicals open source SDKs
+## Welcome to Canvas Medical's open source SDK
 
 This repository is meant to support developers who are customizing their Canvas environments using the [canvas-workflow-kit](https://docs.canvasmedical.com/docs/sdk-quickstart).
 
