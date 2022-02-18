@@ -1,5 +1,5 @@
 import json
-import pprint
+
 import arrow
 
 from canvas_workflow_kit import events
@@ -9,7 +9,7 @@ from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ProtocolResult)
 
 
-class AppointmentTaskCreator(ClinicalQualityMeasure):
+class TestorTask(ClinicalQualityMeasure):
     """
     Protocol that listens for appointment creates and generates a task.
     """
@@ -26,7 +26,7 @@ class AppointmentTaskCreator(ClinicalQualityMeasure):
 
         identifiers = ['AppointmentTaskCreator']
 
-        types = ['Task']
+        types = []
 
         responds_to_event_types = [
             events.HEALTH_MAINTENANCE,
@@ -38,48 +38,34 @@ class AppointmentTaskCreator(ClinicalQualityMeasure):
 
         references = ['Canvas Medical']
 
-        funding_source = ''
-
         notification_only = True
 
     def get_record_by_id(self, recordset, id):
-        print("RECORDS", recordset, type(recordset))
-        if recordset is not None:
-            # print("ARE WE GETTING HERE")
-            recordset_filter = recordset.filter(id=id)
-            if len(recordset_filter):
-                return json.loads(json.dumps(recordset_filter[0], default=str))
-
+        recordset_filter = recordset.filter(id=id)
+        if len(recordset_filter):
+            return json.loads(json.dumps(recordset_filter[0], default=str))
         return {}
 
     def get_new_field_value(self, field_name):
-        # print("ARE WE GETTING", self.context, type(self.context))
-        if hasattr(self.context, 'get'):
-            change_context_fields = self.context['change_info']['fields']
-            # print("ARE WE GETTING", change_context_fields)
-            if field_name not in change_context_fields:
-                return None
-            return change_context_fields[field_name][1]
-        return None
+        change_context_fields = self.context['change_info']['fields']
+        if field_name not in change_context_fields:
+            return None
+        return change_context_fields[field_name][1]
 
     def compute_results(self):
         result = ProtocolResult()
-        # print("PROTOCOL", result)
-        # pp = pprint.PrettyPrinter(indent=4)
-        print("SELF", vars(self))
         result.status = STATUS_NOT_APPLICABLE
 
-        if hasattr(self.context, 'get'):
-            change_context = self.context.get('change_info')
-            if not change_context:
-                return result
+        change_context = self.context.get('change_info')
+        if not change_context:
+            return result
 
-            changed_model = change_context['model_name']
-            created = change_context['created']
+        changed_model = change_context['model_name']
+        created = change_context['created']
 
-            # we only care about appointments that have been created
-            if changed_model != 'appointment' or not created:
-                return result
+        # we only care about appointments that have been created
+        if changed_model != 'appointment' or not created:
+            return result
 
         appointment_start_time = self.get_new_field_value('start_time')
         appointment_note_id = self.get_new_field_value('note_id')

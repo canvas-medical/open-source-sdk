@@ -1,0 +1,323 @@
+{
+  "billingLineItems": [
+    {
+      "id": 91,
+      "created": "2018-08-13T19:23:02.197742Z",
+      "cpt": "99213",
+      "units": 1
+    },
+    {
+      "id": 92,
+      "created": "2018-08-13T21:41:21.407046Z",
+      "cpt": "G0438xx",
+      "units": 1
+    }
+  ],
+  "conditions": [
+    {
+      "id": 96,
+      "noteTimestamp": "2018-11-16T17:58:55.110737Z",
+      "created": "2018-11-16T18:09:19.730231Z",
+      "clinicalStatus": "active",
+      "committer": 2,
+      "coding": [
+        {
+          "id": 186,
+          "system": "http://snomed.info/sct",
+          "version": "",
+          "code": "451051000124101"
+        },
+        {
+          "id": 187,
+          "system": "ICD-10",
+          "version": "",
+          "code": "E119"
+        }
+      ],
+      "lastTimestamps": {
+        "assessed": "2018-11-16T17:58:55.110737Z",
+        "billed": null,
+        "assessedAndBilled": null
+      },
+      "periods": [
+        {
+          "from": "2018-11-16",
+          "to": null
+        }
+      ]
+    }
+  ],
+  "imagingReports": [
+    {
+      "id": 8,
+      "resultDate": "2018-11-16",
+      "originalDate": "2018-10-30",
+      "codings": [
+        {
+          "id": 25,
+          "system": "CPT",
+          "version": "",
+          "code": "24606-6",
+          "value": "probably bengin",
+          "display": "BI-RADS assessment"
+        },
+        {
+          "id": 24,
+          "system": "CPT",
+          "version": "",
+          "code": "com02",
+          "value": "com02",
+          "display": "Comment"
+        },
+        {
+          "id": 23,
+          "system": "CPT",
+          "version": "",
+          "code": "G0202",
+          "value": "N/A",
+          "display": "Mammography, screening; bilateral"
+        }
+      ]
+    }
+  ],
+  "immunizations": [
+    {
+      "id": 2,
+      "noteTimestamp": "2018-11-16 17:58:55.110737+00:00",
+      "dateOrdered": "2018-11-16",
+      "committer": 2,
+      "status": "in-progress",
+      "consentGiven": true,
+      "coding": [
+        {
+          "id": 2,
+          "system": "http://hl7.org/fhir/sid/cvx",
+          "version": "",
+          "code": "50"
+        },
+        {
+          "id": 1,
+          "system": "http://www.ama-assn.org/go/cpt",
+          "version": "",
+          "code": "90721"
+        }
+      ]
+    }
+  ],
+  "instructions": [
+    {
+      "id": 1,
+      "noteTimestamp": "2018-11-16 17:58:55.110737+00:00",
+      "created": "2018-11-16T18:05:07.622666Z",
+      "committer": 2,
+      "coding": [
+        {
+          "id": 1,
+          "system": "http://snomed.info/sct",
+          "version": "",
+          "code": "6143009"
+        }
+      ]
+    }
+  ],
+  "interviews": [
+    {
+      "id": 1,
+      "noteTimestamp": "2018-11-16 17:58:55.110737+00:00",
+      "name": "Diabetes Follow Up",
+      "created": "2018-11-16T17:59:07.334132Z",
+      "committer": 2,
+      "skippedQuestions": [
+
+      ],
+      "questionResponses": [
+        {
+          "id": 1,
+          "responseOption": {
+            "id": 259,
+            "code": ""
+          },
+          "question": 111,
+          "questionnaire": 13,
+          "created": "2018-11-16T17:59:14.859902Z"
+        },
+        {
+          "id": 2,
+          "responseOption": {
+            "id": 261,
+            "code": ""
+          },
+          "question": 112,
+          "questionnaire": 13,
+          "created": "2018-11-16T17:59:16.056631Z"
+        }
+      ],
+      "status": "AC",
+      "progressStatus": "N",
+      "results": [
+        {
+          "id": 1,
+          "score": null,
+          "abnormal": false,
+          "codeSystem": "",
+          "code": ""
+        }
+      ],
+      "questions": [
+
+      ]
+    }
+  ],
+  "labReports": [
+    {
+      "id": 74,
+      "originalDate": "2018-11-12",
+      "values": [
+        {
+          "id": 661,
+          "originalDate": "2018-11-12",
+          "comparableValue": 2.0,
+          "loincCodes": [
+            {
+              "id": 661,
+              "created": "2018-11-16T17:52:54.342944Z",
+              "modified": "2018-11-16T17:52:54.342967Z",
+              "code": "2160-0",
+              "name": "Creatinine",
+              "value": 661
+            }
+          ],
+          "nonDiscreteValues": [
+
+          ],
+          "label": "Creatinine",
+          "created": "2018-11-16T17:52:54.322250Z",
+          "modified": "2018-11-16T17:52:54.322273Z",
+          "value": "2",
+          "units": "mg/dL",
+          "abnormalFlag": "",
+          "referenceRange": " - ",
+          "lowThreshold": "",
+          "highThreshold": "",
+          "comment": "",
+          "report": 74
+        }
+      ]
+    }
+  ],
+  "medications": [
+    {
+      "id": 58,
+      "created": "2018-11-16T18:06:08.080106Z",
+      "erxQuantity": 2.0,
+      "nationalDrugCode": "47682011613",
+      "potencyUnitCode": "C48542",
+      "status": "active",
+      "coding": [
+        {
+          "id": 58,
+          "system": "http://www.fdbhealth.com/",
+          "version": "",
+          "code": "172480"
+        }
+      ],
+      "periods": [
+        {
+          "from": "2018-11-16",
+          "to": null
+        }
+      ]
+    }
+  ],
+  "referralReports": [
+    {
+      "id": 2,
+      "originalDate": "2018-11-11",
+      "specialty": "Ophthalmology: Diabetic Retinopathy Screening",
+      "codings": [
+        {
+          "id": 3,
+          "system": "http://snomed.info/sct",
+          "version": "",
+          "code": "4855003",
+          "value": "Diabetic retinopathy",
+          "display": "Result"
+        },
+        {
+          "id": 2,
+          "system": "http://snomed.info/sct",
+          "version": "",
+          "code": "427478009",
+          "value": "N/A",
+          "display": "Ophthalmology: Diabetic Retinopathy Screening"
+        }
+      ]
+    }
+  ],
+  "vitalSigns": [
+    {
+      "id": 3,
+      "dateRecorded": "2018-11-16T18:08:34.823905Z",
+      "committer": 2,
+      "value": "53",
+      "loincNum": "8302-2",
+      "sign": "height",
+      "units": "in"
+    },
+    {
+      "id": 4,
+      "dateRecorded": "2018-11-16T18:08:34.833062Z",
+      "committer": 2,
+      "value": "2944",
+      "loincNum": "29463-7",
+      "sign": "weight",
+      "units": "oz"
+    },
+    {
+      "id": 5,
+      "dateRecorded": "2018-11-16T18:08:34.842013Z",
+      "committer": 2,
+      "value": "150",
+      "loincNum": "56114-2",
+      "sign": "waist_circumference",
+      "units": "cm"
+    },
+    {
+      "id": 6,
+      "dateRecorded": "2018-11-16T18:08:34.851510Z",
+      "committer": 2,
+      "value": "100",
+      "loincNum": "8310-5",
+      "sign": "body_temperature",
+      "units": "°F"
+    }
+  ],
+  "patient": {
+    "id": 14,
+    "created": "2018-11-16T17:43:33.996139Z",
+    "key": "637d473657024a81af127b24a7d9e35e",
+    "firstName": "Annie",
+    "lastName": "Test1116",
+    "birthDate": "2005-07-26",
+    "sexAtBirth": "F",
+    "sexualOrientationCode": "",
+    "genderIdentityCode": "",
+    "biologicalRaceCode": "",
+    "culturalEthnicityCode": "",
+    "active": true,
+    "deceased": false,
+    "deceasedDatetime": null,
+    "age": "13"
+  },
+  "protocolOverrides": [
+    {
+      "protocolKey": "CMS122v6",
+      "adjustment": null,
+      "snooze": {
+        "reference": "2018-11-02T18:13:06Z",
+        "snoozedDays": 20
+      },
+      "modified": "2018-11-16T18:13:17.648365Z"
+    }
+  ]
+}

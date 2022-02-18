@@ -1,0 +1,40 @@
+[
+  {
+    "id": 8,
+    "resultDate": "2018-10-01",
+    "originalDate": "2018-09-30",
+    "codings": [
+      {
+        "id": 21,
+        "system": "CPT",
+        "version": "",
+        "code": "408573005",
+        "value": "Normal",
+        "display": "Status"
+      },
+      {
+        "id": 20,
+        "system": "CPT",
+        "version": "",
+        "code": "282290005",
+        "value": "5",
+        "display": "Interpretation"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "resultDate": "2018-10-01",
+    "originalDate": "2018-09-30",
+    "codings": [
+      {
+        "id": 29,
+        "system": "CPT",
+        "version": "",
+        "code": "24606-6",
+        "value": "benign findings",
+        "display": "BI-RADS assessment"
+      }
+    ]
+  }
+]

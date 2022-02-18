@@ -1,0 +1,113 @@
+[
+    {
+        "id": 56,
+        "noteTimestamp": "2021-07-23T02:38:43.300420Z",
+        "created": "2021-08-03T04:40:37.618381Z",
+        "clinicalStatus": "active",
+        "committer": 3,
+        "coding":
+        [
+            {
+                "id": 96,
+                "system": "http://snomed.info/sct",
+                "version": "",
+                "code": "270445003",
+                "display": "Type 2 diabetes mellitus without complications"
+            },
+            {
+                "id": 97,
+                "system": "ICD-10",
+                "version": "",
+                "code": "E119",
+                "display": "Type 2 diabetes mellitus without complications"
+            }
+        ],
+        "lastTimestamps":
+        {
+            "assessed": "2021-07-23T02:38:43.300420Z",
+            "billed": null,
+            "assessedAndBilled": null
+        },
+        "periods":
+        [
+            {
+                "from": "2021-07-23",
+                "to": null
+            }
+        ]
+    },
+    {
+        "id": 86,
+        "noteTimestamp": "2021-08-24T04:09:11.164027Z",
+        "created": "2021-08-26T04:04:23.208975Z",
+        "clinicalStatus": "active",
+        "committer": 3,
+        "coding":
+        [
+            {
+                "id": 152,
+                "system": "http://snomed.info/sct",
+                "version": "",
+                "code": "71892000",
+                "display": "Left ventricular failure, unspecified"
+            },
+            {
+                "id": 153,
+                "system": "ICD-10",
+                "version": "",
+                "code": "I501",
+                "display": "Left ventricular failure, unspecified"
+            }
+        ],
+        "lastTimestamps":
+        {
+            "assessed": "2021-08-24T04:09:11.164027Z",
+            "billed": null,
+            "assessedAndBilled": null
+        },
+        "periods":
+        [
+            {
+                "from": "2021-08-24",
+                "to": null
+            }
+        ]
+    },
+    {
+        "id": 87,
+        "noteTimestamp": "2021-08-24T04:09:11.164027Z",
+        "created": "2021-08-26T04:19:26.680271Z",
+        "clinicalStatus": "investigative",
+        "committer": 3,
+        "coding":
+        [
+            {
+                "id": 154,
+                "system": "http://snomed.info/sct",
+                "version": "",
+                "code": "404684003",
+                "display": "Other obesity due to excess calories"
+            },
+            {
+                "id": 155,
+                "system": "ICD-10",
+                "version": "",
+                "code": "E6609",
+                "display": "Other obesity due to excess calories"
+            }
+        ],
+        "lastTimestamps":
+        {
+            "assessed": "2021-08-24T04:09:11.164027Z",
+            "billed": null,
+            "assessedAndBilled": null
+        },
+        "periods":
+        [
+            {
+                "from": "2021-08-24",
+                "to": null
+            }
+        ]
+    }
+]

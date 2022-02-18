@@ -1,0 +1,17 @@
+[
+  {
+    "results": [
+      {
+        "id": 6,
+        "score": null,
+        "abnormal": false,
+        "codeSystem": "http://snomed.info/sct",
+        "code": ""
+      }
+    ],
+    "questions": [
+    ],
+    "committer": 2,
+    "noteTimestamp": "2018-08-23T16:42:11.132046Z"
+  }
+]

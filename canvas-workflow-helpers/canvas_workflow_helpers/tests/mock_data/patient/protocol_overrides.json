@@ -1,0 +1,29 @@
+[
+  {
+    "protocolKey": "HCC001v1",
+    "adjustment": {
+      "reference": "2018-10-01T00:00:00Z",
+      "cycleDays": 19
+    },
+    "snooze": {
+      "reference": "2018-10-01T00:00:00Z",
+      "snoozedDays": 22
+    },
+    "modified": "2018-10-23T21:50:09.661490Z"
+  },
+  {
+    "protocolKey": "HCC002v2",
+    "adjustment": {
+      "reference": "2017-10-01T00:00:00Z",
+      "cycleDays": 233
+    },
+    "snooze": {
+      "reference": "2017-10-01T00:00:00Z",
+      "snoozedDays": 199,
+      "reasonCode": "413311005",
+      "reasonCodeSystem": "snomed",
+      "reasonText": "PATIENT_REFUSED"
+    },
+    "modified": "2018-10-23T21:50:09.661490Z"
+  }
+]

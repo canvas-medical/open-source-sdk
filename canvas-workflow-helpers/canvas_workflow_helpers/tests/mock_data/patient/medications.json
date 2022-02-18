@@ -1,0 +1,32 @@
+[
+  {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "198051",
+        "display": "PRILOSEC DR 20 MG CAPSULE"
+      }
+    ],
+    "periods": [
+      {
+        "from": "2018-05-29",
+        "to": null
+      }
+    ]
+  },
+  {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "197591",
+        "display": "VALIUM 5 MG TABLET"
+      }
+    ],
+    "periods": [
+      {
+        "from": "2018-05-29",
+        "to": null
+      }
+    ]
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "originalDate": "2018-01-01",
+    "values": [
+      {
+        "loincCodes": [
+          {
+            "id": 1315,
+            "created": "2018-06-07T22:39:33.193439Z",
+            "modified": "2018-06-07T22:39:33.193461Z",
+            "code": "14683-7",
+            "name": "Creat Ur",
+            "value": 1315
+          },
+          {
+            "id": 1316,
+            "created": "2018-06-07T22:39:33.206939Z",
+            "modified": "2018-06-07T22:39:33.206962Z",
+            "code": "22708-2",
+            "name": "HVA/Creat Ur",
+            "value": 1316
+          }
+        ],
+        "originalDate": "2018-06-07"
+      }
+    ]
+  }
+]

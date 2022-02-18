@@ -1,0 +1,46 @@
+[
+  {
+    "coding": [
+      {
+        "id": 63,
+        "system": "ICD-10",
+        "version": "",
+        "code": "B20"
+      },
+      {
+        "id": 64,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "86406008"
+      }
+    ],
+    "periods": [
+      {
+        "from": "2003-08-03",
+        "to": "2003-10-21"
+      }
+    ]
+  },
+  {
+    "coding": [
+      {
+        "id": 69,
+        "system": "ICD-10",
+        "version": "",
+        "code": "F319"
+      },
+      {
+        "id": 70,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "13746004"
+      }
+    ],
+    "periods": [
+      {
+        "from": "2004-05-20",
+        "to": null
+      }
+    ]
+  }
+]
