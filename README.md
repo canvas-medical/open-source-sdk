@@ -2,16 +2,47 @@
 
 This repository is meant to support developers who are customizing their Canvas environments using the [canvas-workflow-kit](https://docs.canvasmedical.com/docs/sdk-quickstart).
 
-This open source project is new, and we will be updating this documentation as we grow.
-For now, this is where developers can find examples of different [protocols](https://docs.canvasmedical.com/docs/canvas-cli#upload) that can be uploaded to Canvas environments to support clinical workflows. These protocols are calculated on specified [events](https://docs.canvasmedical.com/docs/event-types) emitted from the canvas platform (you can choose whatever event you want to listen for).
+This open source project is new, and we will be updating this documentation as we grow. :bug::butterfly:
+
+For now, this is where developers can find the following:
+
+### Protocols
+
+[`canvas_workflow_helpers/protocols`](https://github.com/canvas-medical/open-source-sdk/tree/main/canvas_workflow_helpers/protocols) contain examples of different [protocols](https://docs.canvasmedical.com/docs/canvas-cli#upload) that can be uploaded to Canvas environments to support clinical workflows. These protocols are calculated on specified [events](https://docs.canvasmedical.com/docs/event-types) emitted from the canvas platform (you can choose whatever event you want to listen for).
 
 Here are examples of different protocols you can find in this repo:
 
-- On appointment creation, create a task to remind that patient of their upcoming appointment.
+- On appointment creation, create a task to remind patients of their upcoming appointment.
 - On appointment update or creation, send a notification to an external server with relevant information about the appointment.
 - On patient data change, show a protocol in each patient's chart with useful patient links for the clinical user.
 
-We encourage developers to fork this repo and share their custom protocol. The canvas-workflow-kit gives developers the flexibility to implement a variety of custom workflows; imagine what we could do if we shared them all!
+### Value Sets
+
+[`canvas_workflow_helpers/value_sets`](https://github.com/canvas-medical/open-source-sdk/tree/main/canvas_workflow_helpers/value_sets) contains the [v2021 value sets](https://docs.canvasmedical.com/docs/value-sets). Value sets contain lists of codes (RXNORM, SNOMED, ICD...) that represent concepts. An example of a value set is as follows:
+
+```
+class Nausea(ValueSet):
+    VALUE_SET_NAME = 'Nausea with vomiting, unspecified'
+    ICD10CM = {'R112'}
+```
+
+This Nausea value set may be used in many different scenarios. Here is one example of its use:
+
+```
+def affected_population(self):
+    """  Patients with nausea.  """
+    nausea_conditions = self.patient.conditions.find(Nausea).filter(clinicalStatus='active')
+    if not nausea_conditions:
+        return False
+    self.nausea = nausea_conditions[0]
+    return True
+```
+
+The v2021 value sets are maintained by the [Agency for Healthcare Research and Quality](https://www.hcup-us.ahrq.gov/) (or AHRQ) and is updated throughout the year to return the most up-to-date results. Some scenarios may require a custom value set not present in the v2021 set.
+
+---
+
+We encourage developers to fork this repo and share their custom protocols and Value Sets. The `canvas-workflow-kit` gives developers the flexibility to implement a variety of custom workflows; imagine what we could do if we shared them all!
 
 ## Getting Started
 
