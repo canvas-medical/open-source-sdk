@@ -1,4 +1,3 @@
-from cgitb import reset
 from pathlib import Path
 
 from canvas_workflow_kit.constants import CHANGE_TYPE
@@ -17,13 +16,26 @@ class BannerAlertsTest(WorkflowHelpersBaseTest):
         currentDir = Path(__file__).parent.resolve()
         self.mocks_path = f'{currentDir}/mock_data/'
 
-        patient_with_contacts = self.load_patient('patient_has_appointments')
-        patient_without_contacts = self.load_patient('patient_no_appointments')
+        multiple_contacts_73yo = self.load_patient(
+            'patient_contacts/multiple_contacts_73yo')
+        no_contacts_13yo = self.load_patient(
+            'patient_contacts/no_contacts_13yo')
+        no_contacts_72yo = self.load_patient(
+            'patient_contacts/no_contacts_72yo')
+        one_contact_73yo = self.load_patient(
+            'patient_contacts/one_contact_73yo')
 
-        self.contact_class = self.createProtocolClass()(
-            patient=patient_with_contacts)
-        self.no_contacts_class = self.createProtocolClass()(
-            patient=patient_without_contacts)
+        self.multiple_contact_class = self.createProtocolClass()(
+            patient=multiple_contacts_73yo)
+
+        self.no_contacts_class_13yo = self.createProtocolClass()(
+            patient=no_contacts_13yo)
+
+        self.no_contacts_class_72yo = self.createProtocolClass()(
+            patient=no_contacts_72yo)
+
+        self.one_contact_73yo = self.createProtocolClass()(
+            patient=one_contact_73yo)
 
     def createProtocolClass(self):
         template_path = Path(
@@ -33,7 +45,7 @@ class BannerAlertsTest(WorkflowHelpersBaseTest):
         return parse_class_from_python_source(template)
 
     def test_fields(self):
-        Protocol = self.contact_class
+        Protocol = self.multiple_contact_class
         self.assertEqual('Reminders about patients over the age of 70',
                          Protocol._meta.description)
         self.assertEqual('Banner Alert Contacts', Protocol._meta.title)
@@ -50,8 +62,8 @@ class BannerAlertsTest(WorkflowHelpersBaseTest):
         self.assertEqual(['Canvas Medical'], Protocol._meta.references)
         self.assertEqual('', Protocol._meta.funding_source)
 
-    def test_contact_class(self):
-        tested = self.contact_class
+    def test_no_contacts_under_70(self):
+        tested = self.no_contacts_class_13yo
         result = tested.compute_results()
 
         self.assertIsInstance(result, ProtocolResult)
@@ -62,8 +74,8 @@ class BannerAlertsTest(WorkflowHelpersBaseTest):
         self.assertEqual(30, result.days_of_notice)
         self.assertIsNone(result.next_review)
 
-    def test_no_contact_class(self):
-        tested = self.no_contacts_class
+    def test_no_contacts_over_70(self):
+        tested = self.no_contacts_class_72yo
         result = tested.compute_results()
 
         self.assertIsInstance(result, ProtocolResult)
@@ -75,9 +87,51 @@ class BannerAlertsTest(WorkflowHelpersBaseTest):
         self.assertEqual(30, result.days_of_notice)
         self.assertIsNone(result.next_review)
 
-    """
-    The rest of these functions tested depend on context = {}
-    Currently there is a bug where context = 'report', but the pr is almost ready to merge
-    Once fix is merged, add more tests
-    For now, just test that these do not error
-    """
+    def test_multiple_contacts_over_70(self):
+        tested = self.multiple_contact_class
+        result = tested.compute_results()
+
+        self.assertIsInstance(result, ProtocolResult)
+        self.assertEqual(STATUS_DUE, result.status)
+        self.assertIsInstance(result.recommendations[0],
+                              BannerAlertIntervention)
+        self.assertEqual('', result.narrative)
+        self.assertEqual(-1, result.due_in)
+        self.assertEqual(30, result.days_of_notice)
+        self.assertIsNone(result.next_review)
+
+    def test_one_contact_over_70(self):
+        tested = self.one_contact_73yo
+        result = tested.compute_results()
+
+        self.assertIsInstance(result, ProtocolResult)
+        self.assertEqual(STATUS_DUE, result.status)
+        self.assertIsInstance(result.recommendations[0],
+                              BannerAlertIntervention)
+        self.assertEqual('', result.narrative)
+        self.assertEqual(-1, result.due_in)
+        self.assertEqual(30, result.days_of_notice)
+        self.assertIsNone(result.next_review)
+
+    def test_in_denominator(self):
+        expected_true = self.one_contact_73yo
+        result_true = expected_true.in_denominator()
+        expected_false = self.no_contacts_class_13yo
+        result_false = expected_false.in_denominator()
+
+        self.assertEqual(result_true, True)
+        self.assertEqual(result_false, False)
+
+    def test_get_contact_display(self):
+        tested = self.one_contact_73yo
+        contact = {
+            "name": "Hansen Azamar",
+            "relationship": "Husband",
+            "phoneNumber": "0000000000",
+            "email": "hansen.test@testing.test",
+            "emergencyContact": False,
+            "authorizedForReleaseOfInformation": False,
+            "id": 2
+        }
+        result = tested.get_contact_display(contact)
+        self.assertEqual(result, 'Hansen Azamar (Husband)')

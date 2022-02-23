@@ -1,0 +1,46 @@
+[
+  {
+    "results": [
+      {
+        "id": 5,
+        "score": 4.0,
+        "abnormal": true,
+        "codeSystem": "http://loinc.org",
+        "code": "75626-2"
+      }
+    ],
+    "questions": [
+      {
+        "code": "68519-8",
+        "codeSystem": "http://loinc.org",
+        "questionResponseId": 37
+      },
+      {
+        "code": "68518-0",
+        "codeSystem": "http://loinc.org",
+        "questionResponseId": 36
+      },
+      {
+        "code": "68520-6",
+        "codeSystem": "http://loinc.org",
+        "questionResponseId": 33
+      }
+    ],
+    "noteTimestamp": "2018-08-23T16:40:27.970348Z"
+  },
+  {
+    "results": [
+      {
+        "id": 6,
+        "score": null,
+        "abnormal": false,
+        "codeSystem": "http://snomed.info/sct",
+        "code": ""
+      }
+    ],
+    "questions": [
+    ],
+    "committer": 2,
+    "noteTimestamp": "2018-08-23T16:42:11.132046Z"
+  }
+]

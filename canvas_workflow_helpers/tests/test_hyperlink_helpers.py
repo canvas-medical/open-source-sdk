@@ -1,13 +1,10 @@
-from cgitb import reset
 from pathlib import Path
-from unittest.mock import create_autospec
 
 from canvas_workflow_kit.utils import parse_class_from_python_source
 from .base import WorkflowHelpersBaseTest
 from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import (ProtocolResult, STATUS_DUE)
-from canvas_workflow_kit.recommendation import (Recommendation,
-                                                HyperlinkRecommendation)
+from canvas_workflow_kit.recommendation import (HyperlinkRecommendation)
 
 
 class HyperlinkHelpersTest(WorkflowHelpersBaseTest):
@@ -17,13 +14,13 @@ class HyperlinkHelpersTest(WorkflowHelpersBaseTest):
         currentDir = Path(__file__).parent.resolve()
         self.mocks_path = f'{currentDir}/mock_data/'
 
-        patient = self.load_patient('patient_has_appointments')
-        patient_without_appointments = self.load_patient(
-            'patient_no_appointments')
+        full_patient = self.load_patient('full_detailed_patient')
+        partial_patient = self.load_patient('partial_detailed_patient')
 
-        self.base_class = self.createProtocolClass()(patient=patient)
-        self.no_appointments_class = self.createProtocolClass()(
-            patient=patient_without_appointments)
+        self.full_patient_class = self.createProtocolClass()(
+            patient=full_patient)
+        self.partial_patient_class = self.createProtocolClass()(
+            patient=partial_patient)
 
     def createProtocolClass(self):
         template_path = Path(
@@ -33,7 +30,7 @@ class HyperlinkHelpersTest(WorkflowHelpersBaseTest):
         return parse_class_from_python_source(template)
 
     def test_fields(self):
-        Protocol = self.base_class
+        Protocol = self.full_patient_class
         self.assertEqual(
             'Creates external dynamic hyperlinks at the top of the protocol list',
             Protocol._meta.description)
@@ -52,7 +49,7 @@ class HyperlinkHelpersTest(WorkflowHelpersBaseTest):
         self.assertEqual(False, Protocol._meta.can_be_snoozed)
 
     def test_appointment_class_result(self):
-        tested = self.base_class
+        tested = self.full_patient_class
         result = tested.compute_results()
 
         self.assertIsInstance(result, ProtocolResult)
@@ -65,10 +62,10 @@ class HyperlinkHelpersTest(WorkflowHelpersBaseTest):
         self.assertIsNone(result.next_review)
 
     def test_patient_external_id(self):
-        patient_with_appointments = self.base_class
-        expecting_id = patient_with_appointments.patient_external_id()
-        patient_no_appointments = self.no_appointments_class
-        expecting_empty_string = patient_no_appointments.patient_external_id()
+        full_patient = self.full_patient_class
+        expecting_id = full_patient.patient_external_id()
+        partial_patient = self.partial_patient_class
+        expecting_empty_string = partial_patient.patient_external_id()
 
         self.assertEqual(expecting_id, '72342334')
         self.assertEqual(expecting_empty_string, '')

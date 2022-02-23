@@ -52,16 +52,16 @@ class DiagnosticAssessment(ClinicalQualityMeasure):
 
         title = 'Diagnostic Assessment'
 
-        version = '2021-v1'
+        version = 'v1.0.0'
 
         description = ('A protocol that recommends diagnosing'
                        'certain conditions based on questionnaire responses.')
 
         information = 'https://canvasmedical.com/'
 
-        identifiers = []
+        identifiers = ['DiagnosticAssessment']
 
-        types = []
+        types = ['Tools']
 
         responds_to_event_types = [
             events.HEALTH_MAINTENANCE,
@@ -73,6 +73,8 @@ class DiagnosticAssessment(ClinicalQualityMeasure):
         authors = ['Canvas Medical']
 
         references = ['Canvas Medical']
+
+        funding_source = ''
 
     most_recent_interview = None
     positive_question_ids = set()
@@ -156,7 +158,7 @@ class DiagnosticAssessment(ClinicalQualityMeasure):
                 result.due_in = -1
                 result.status = STATUS_DUE
                 result.add_narrative(
-                    f'{self.patient.first_name} responsed "Yes" to '
+                    f'{self.patient.first_name} responded "Yes" to '
                     f'{len(self.conditions_to_diagnose)} questions in the Diagnostic Assessment '
                     f'Questionnaire, but has not been diagnosed with the associated conditions. '
                     f'Consider updating the Conditions List as clinically appropriate'

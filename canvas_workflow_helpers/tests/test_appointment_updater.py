@@ -1,4 +1,3 @@
-from cgitb import reset
 from pathlib import Path
 
 from canvas_workflow_kit.constants import CHANGE_TYPE
@@ -17,8 +16,9 @@ class AppointmentUpdaterTest(WorkflowHelpersBaseTest):
         self.mocks_path = f'{currentDir}/mock_data/'
 
         patient_has_appointments = self.load_patient(
-            'patient_has_appointments')
-        patient_no_appointments = self.load_patient('patient_no_appointments')
+            'patient_appointments/patient_has_appointments')
+        patient_no_appointments = self.load_patient(
+            'patient_appointments/patient_no_appointments')
 
         self.appointment_class = self.createProtocolClass()(
             patient=patient_has_appointments)

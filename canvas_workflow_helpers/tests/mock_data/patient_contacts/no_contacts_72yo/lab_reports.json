@@ -1,0 +1,72 @@
+[
+  {
+    "id": 67,
+    "originalDate": "2018-01-01",
+    "values": [
+      {
+        "loincCodes": [
+          {
+            "id": 44,
+            "created": "2018-05-29T02:38:30.107194Z",
+            "modified": "2018-05-29T02:38:30.107219Z",
+            "code": "13457-7",
+            "name": "LBL Cholesterol",
+            "value": 44
+          },
+          {
+            "id": 45,
+            "created": "2018-05-29T02:38:30.112844Z",
+            "modified": "2018-05-29T02:38:30.112866Z",
+            "code": "2085-9",
+            "name": "HDL Cholesterol",
+            "value": 45
+          },
+          {
+            "id": 46,
+            "created": "2018-05-29T02:38:30.118449Z",
+            "modified": "2018-05-29T02:38:30.118472Z",
+            "code": "2571-8",
+            "name": "Triglycerides",
+            "value": 46
+          },
+          {
+            "id": 47,
+            "created": "2018-05-29T02:38:30.124247Z",
+            "modified": "2018-05-29T02:38:30.124268Z",
+            "code": "2093-3",
+            "name": "Cholesterol, Total",
+            "value": 47
+          }
+        ],
+        "originalDate": "2018-05-29"
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "originalDate": "2018-01-01",
+    "values": [
+      {
+        "loincCodes": [
+          {
+            "id": 1315,
+            "created": "2018-06-07T22:39:33.193439Z",
+            "modified": "2018-06-07T22:39:33.193461Z",
+            "code": "14683-7",
+            "name": "Creat Ur",
+            "value": 1315
+          },
+          {
+            "id": 1316,
+            "created": "2018-06-07T22:39:33.206939Z",
+            "modified": "2018-06-07T22:39:33.206962Z",
+            "code": "22708-2",
+            "name": "HVA/Creat Ur",
+            "value": 1316
+          }
+        ],
+        "originalDate": "2018-06-07"
+      }
+    ]
+  }
+]

@@ -47,10 +47,6 @@ class BannerAlertContacts(ClinicalQualityMeasure):
             display += f' ({relationship})'
         return display
 
-    def has_contact_category(self, categories, category):
-        return next((cat for cat in categories if cat['category'] == category),
-                    None) is not None
-
     def in_denominator(self):
         """
         Patients over the age of 70.
@@ -70,13 +66,11 @@ class BannerAlertContacts(ClinicalQualityMeasure):
             release_of_info_contacts = []
             poa_contacts = []
             for contact in self.patient.patient.get('contacts', []):
-                categories = contact.get('categories', [])
-                if self.has_contact_category(categories, 'EMC'):
+                # categories = contact.get('categories', [])
+                if contact.get('emergencyContact', False):
                     emergency_contacts.append(contact)
-                if self.has_contact_category(categories, 'ARI'):
+                if contact.get('authorizedForReleaseOfInformation', False):
                     release_of_info_contacts.append(contact)
-                if self.has_contact_category(categories, 'POA'):
-                    poa_contacts.append(contact)
 
             num_emergency_contacts = len(emergency_contacts)
             num_release_contacts = len(release_of_info_contacts)

@@ -1,0 +1,19 @@
+[
+  {
+    "coding": [
+      {
+        "id": 14,
+        "system": "http://www.ama-assn.org/go/cpt",
+        "version": "",
+        "code": "90476"
+      },
+      {
+        "id": 13,
+        "system": "http://hl7.org/fhir/sid/cvx",
+        "version": "",
+        "code": "54"
+      }
+    ],
+    "dateOrdered": "2018-08-22"
+  }
+]
