@@ -23,9 +23,9 @@ class AppointmentNotification(ClinicalQualityMeasure):
 
         information = 'https://canvasmedical.com/'
 
-        identifiers = []
+        identifiers = ['AppointmentNotification']
 
-        types = []
+        types = ['Notification']
 
         responds_to_event_types = [
             events.HEALTH_MAINTENANCE,
@@ -37,35 +37,44 @@ class AppointmentNotification(ClinicalQualityMeasure):
 
         references = ['Canvas Medical']
 
+        funding_source = ''
+
         notification_only = True
-
-    def get_record_by_id(self, recordset, id):
-        recordset_filter = recordset.filter(id=id)
-        if len(recordset_filter):
-            return json.loads(json.dumps(recordset_filter[0], default=str))
-        return {}
-
-    def get_appointment_from_note_id(self, note_id):
-        appointment_note = self.get_record_by_id(
-            self.patient.upcoming_appointment_notes, note_id)
-        appointment_id = appointment_note.get('currentAppointmentId')
-        return self.get_record_by_id(self.patient.upcoming_appointments,
-                                     appointment_id)
-
-    def get_new_field_value(self, field_name):
-        change_context_fields = self.context['change_info']['fields']
-        if field_name not in change_context_fields:
-            return None
-        return change_context_fields[field_name][1]
 
     def appointment_note_has_a_previously_booked_appointment(
             self, appointment_note_id):
-        appointment_note = self.get_record_by_id(
-            self.patient.upcoming_appointment_notes, appointment_note_id)
-        state_history = appointment_note.get('stateHistory', [])
-        if len(state_history) >= 2:
-            previous_states = [s['state'] for s in state_history][:-1]
-            return 'BKD' in previous_states
+        if self.patient.upcoming_appointment_notes:
+            appointment_note = self.get_record_by_id(
+                self.patient.upcoming_appointment_notes, appointment_note_id)
+            state_history = appointment_note.get('stateHistory', [])
+            if len(state_history) >= 2:
+                previous_states = [s['state'] for s in state_history][:-1]
+                return 'BKD' in previous_states
+        return False
+
+    def get_appointment_from_note_id(self, note_id):
+        if self.patient.upcoming_appointment_notes:
+            appointment_note = self.get_record_by_id(
+                self.patient.upcoming_appointment_notes, note_id)
+            appointment_id = appointment_note.get('currentAppointmentId')
+            return self.get_record_by_id(self.patient.upcoming_appointments,
+                                         appointment_id)
+        return None
+
+    def get_new_field_value(self, field_name):
+        if hasattr(self.context, 'get'):
+            change_context_fields = self.context['change_info']['fields']
+            if field_name not in change_context_fields:
+                return None
+            return change_context_fields[field_name][1]
+        return None
+
+    def get_record_by_id(self, recordset, id):
+        if recordset is not None:
+            recordset_filter = recordset.filter(id=id)
+            if recordset_filter:
+                return json.loads(json.dumps(recordset_filter[0], default=str))
+        return {}
 
     @property
     def patient_external_id(self):
@@ -89,10 +98,9 @@ class AppointmentNotification(ClinicalQualityMeasure):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        change_context = self.context.get('change_info')
-        if not change_context:
+        if not hasattr(self.context, 'get'):
             return result
-
+        change_context = self.context.get('change_info')
         payload = self.base_payload
         changed_model = change_context['model_name']
 

@@ -17,15 +17,15 @@ class BannerAlertContacts(ClinicalQualityMeasure):
 
         title = 'Banner Alert Contacts'
 
-        version = '2021-v1'
+        version = 'v1.0.0'
 
         description = 'Reminders about patients over the age of 70'
 
-        information = 'https://canvasmedical.com'
+        information = 'https://canvasmedical.com/'
 
         identifiers = ['BannerAlertContacts']
 
-        types = []
+        types = ['Alerts']
 
         responds_to_event_types = [
             events.HEALTH_MAINTENANCE,
@@ -35,6 +35,8 @@ class BannerAlertContacts(ClinicalQualityMeasure):
         authors = ['Canvas Medical']
 
         references = ['Canvas Medical']
+
+        funding_source = ''
 
     rounded_patient_age = None
 

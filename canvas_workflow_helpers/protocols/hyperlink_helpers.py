@@ -5,21 +5,21 @@ from canvas_workflow_kit.recommendation import HyperlinkRecommendation
 
 class HyperlinkHelpers(ClinicalQualityMeasure):
     """
-    Protocol that creates external dyanmic hyperlinks at the top of the protocol list
+    Protocol that creates external dynamic hyperlinks at the top of the protocol list
     """
 
     class Meta:
         title = 'External Links'
 
-        version = 'v1.0.1'
+        version = 'v1.0.0'
 
-        description = 'Creates external dyanmic hyperlinks at the top of the protocol list'
+        description = 'Creates external dynamic hyperlinks at the top of the protocol list'
 
         information = 'https://canvasmedical.com/'
 
-        identifiers = []
+        identifiers = ['ExternalLinks']
 
-        types = []
+        types = ['Links']
 
         references = ['Links to external resources about the patient']
 
@@ -29,13 +29,15 @@ class HyperlinkHelpers(ClinicalQualityMeasure):
 
         authors = ['Canvas Medical']
 
+        funding_source = ''
+
         can_be_snoozed = False
 
-    @property
     def patient_external_id(self):
-        external_identifiers = self.patient.patient['externalIdentifiers']
-        if len(external_identifiers):
-            return external_identifiers[0]['value']
+        if self.patient.patient.get('externalIdentifiers'):
+            external_identifiers = self.patient.patient['externalIdentifiers']
+            if len(external_identifiers):
+                return external_identifiers[0]['value']
         return ''
 
     def compute_results(self):

@@ -13,15 +13,15 @@ class AppointmentUpdate(ClinicalQualityMeasure):
     class Meta:
         title = 'Appointment Update'
 
-        version = '2021-v1'
+        version = 'v1.0.0'
 
         description = 'Adds a meeting link to an appointment after it is created'
 
-        information = 'https://canvasmedical.com'
+        information = 'https://canvasmedical.com/'
 
-        identifiers = []
+        identifiers = ['AppointmentUpdater']
 
-        types = []
+        types = ['Update']
 
         responds_to_event_types = [
             events.HEALTH_MAINTENANCE,
@@ -33,23 +33,27 @@ class AppointmentUpdate(ClinicalQualityMeasure):
 
         references = ['Canvas Medical']
 
+        funding_source = ''
+
         notification_only = True
 
     meeting_link = 'https://www.google.com/search?q=video+call'
 
     def get_new_field_value(self, field_name):
-        change_context_fields = self.context['change_info']['fields']
-        if field_name not in change_context_fields:
-            return None
-        return change_context_fields[field_name][1]
+        if hasattr(self.context, 'get'):
+            change_context_fields = self.context['change_info']['fields']
+            if field_name not in change_context_fields:
+                return None
+            return change_context_fields[field_name][1]
+        return None
 
     def compute_results(self):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        change_context = self.context.get('change_info')
-        if not change_context:
+        if not hasattr(self.context, 'get'):
             return result
+        change_context = self.context.get('change_info')
 
         changed_model = change_context['model_name']
         created = change_context['created']
