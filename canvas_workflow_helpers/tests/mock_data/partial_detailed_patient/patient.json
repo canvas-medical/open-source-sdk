@@ -13,5 +13,16 @@
   "active": true,
   "deceased": false,
   "deceasedDatetime": null,
-  "age": "58"
+  "age": "58",
+  "contacts": [
+    {
+      "name": "Hansen Azamar",
+      "relationship": "Husband",
+      "phoneNumber": "0000000000",
+      "email": "hansen.test@testing.test",
+      "emergencyContact": false,
+      "authorizedForReleaseOfInformation": false,
+      "id": 2
+    }
+  ]
 }
