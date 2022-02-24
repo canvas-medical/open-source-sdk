@@ -135,3 +135,23 @@ class BannerAlertsTest(WorkflowHelpersBaseTest):
         }
         result = tested.get_contact_display(contact)
         self.assertEqual(result, 'Hansen Azamar (Husband)')
+
+    def test_has_contact_category(self):
+        tested = self.multiple_contact_class
+        emergency_contacts = []
+        release_of_info_contacts = []
+        poa_contacts = []
+
+        for contact in self.multiple_contact_class.patient.patient.get(
+                'contacts', []):
+            categories = contact.get('categories', [])
+            if tested.has_contact_category(categories, 'EMC'):
+                emergency_contacts.append(contact)
+            if tested.has_contact_category(categories, 'ARI'):
+                release_of_info_contacts.append(contact)
+            if tested.has_contact_category(categories, 'POA'):
+                poa_contacts.append(contact)
+
+        self.assertEqual(len(emergency_contacts), 1)
+        self.assertEqual(len(release_of_info_contacts), 1)
+        self.assertEqual(len(poa_contacts), 1)

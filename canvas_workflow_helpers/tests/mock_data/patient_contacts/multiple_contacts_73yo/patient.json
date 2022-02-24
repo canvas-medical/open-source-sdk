@@ -30,31 +30,61 @@
   "addresses": [],
   "contacts": [
     {
-      "name": "Hansen Azamar",
-      "relationship": "Husband",
+      "name": "Humberto",
+      "relationship": "Brother",
       "phoneNumber": "0000000000",
-      "email": "hansen.test@testing.test",
+      "email": "test@testing.test",
       "emergencyContact": false,
       "authorizedForReleaseOfInformation": false,
-      "id": 2
+      "id": 4,
+      "categories": [
+        {
+          "id": 9,
+          "document": null,
+          "categoryDisplay": "Emergency contact",
+          "created": "2022-02-23T23:07:04.193258Z",
+          "modified": "2022-02-23T23:07:04.193279Z",
+          "category": "EMC"
+        }
+      ]
     },
     {
-      "name": "Newman Azamar",
+      "name": "Alex",
+      "relationship": "wife",
+      "phoneNumber": "0000000000",
+      "email": "test@test.test",
+      "emergencyContact": false,
+      "authorizedForReleaseOfInformation": false,
+      "id": 5,
+      "categories": [
+        {
+          "id": 12,
+          "document": null,
+          "categoryDisplay": "Authorized for release of information",
+          "created": "2022-02-23T23:18:47.386673Z",
+          "modified": "2022-02-23T23:18:47.386690Z",
+          "category": "ARI"
+        }
+      ]
+    },
+    {
+      "name": "Bobbie",
       "relationship": "Son",
       "phoneNumber": "0000000000",
-      "email": "hansen.test@testing.test",
+      "email": "test@test.test",
       "emergencyContact": false,
       "authorizedForReleaseOfInformation": false,
-      "id": 2
-    },
-    {
-      "name": "Laura Azamar",
-      "relationship": "Daughter",
-      "phoneNumber": "0000000000",
-      "email": "hansen.test@testing.test",
-      "emergencyContact": false,
-      "authorizedForReleaseOfInformation": false,
-      "id": 2
+      "id": 6,
+      "categories": [
+        {
+          "id": 11,
+          "document": null,
+          "categoryDisplay": "Power of attorney",
+          "created": "2022-02-23T23:18:36.940092Z",
+          "modified": "2022-02-23T23:18:36.940106Z",
+          "category": "POA"
+        }
+      ]
     }
   ],
   "language": "English",
