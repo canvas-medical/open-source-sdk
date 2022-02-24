@@ -1,18 +1,19 @@
-name: Build
-
+name: Workflow helpers
 on:
   push:
-    branches:
-      - main
-  pull_request:
     paths-ignore:
-      # Don't bother building if we're only updating the changelog.
+      # Don't bother testing if we're only updating the changelog.
       - "**.md"
     branches:
       - "**"
 
+push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  build:
+  workflow-helpers:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -31,6 +32,10 @@ jobs:
 
       - name: Install Dependencies
         run: poetry install
+
+      - name: Test with pytest
+        run: |
+          poetry run pytest --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
 
       - name: Build
         run: poetry build
