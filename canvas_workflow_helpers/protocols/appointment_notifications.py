@@ -90,6 +90,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
             'external_patient_id': self.patient_external_id
         }
 
+    # REPLACE this url with your server url which should receive these notifications
     notification_url = 'http://cfc4-76-224-185-72.ngrok.io'
 
     headers = {'Content-Type': 'application/json'}
@@ -102,7 +103,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
             return result
         change_context = self.context.get('change_info')
         payload = self.base_payload
-        changed_model = change_context['model_name']
+        changed_model = change_context.get('model_name', '')
 
         if changed_model == 'notestatechangeevent':
             cancelled = self.get_new_field_value('state') == 'CLD'

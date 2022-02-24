@@ -30,13 +30,23 @@
   "addresses": [],
   "contacts": [
     {
-      "name": "Hansen Azamar",
-      "relationship": "Husband",
+      "name": "Harold",
+      "relationship": "Brother",
       "phoneNumber": "0000000000",
-      "email": "hansen.test@testing.test",
+      "email": "test@testing.test",
       "emergencyContact": false,
       "authorizedForReleaseOfInformation": false,
-      "id": 2
+      "id": 4,
+      "categories": [
+        {
+          "id": 9,
+          "document": null,
+          "categoryDisplay": "Emergency contact",
+          "created": "2022-02-23T23:07:04.193258Z",
+          "modified": "2022-02-23T23:07:04.193279Z",
+          "category": "EMC"
+        }
+      ]
     }
   ],
   "language": "English",

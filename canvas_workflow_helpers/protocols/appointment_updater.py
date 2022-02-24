@@ -7,7 +7,7 @@ from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
 
 class AppointmentUpdate(ClinicalQualityMeasure):
     """
-    Adds a meeting link to an appointment after it is created
+    Adds a meeting link to a Telehealth appointment after it is created
     """
 
     class Meta:

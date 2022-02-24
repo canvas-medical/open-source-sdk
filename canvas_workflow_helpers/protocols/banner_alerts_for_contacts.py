@@ -56,6 +56,10 @@ class BannerAlertContacts(ClinicalQualityMeasure):
         self.rounded_patient_age = rounded_patient_age
         return rounded_patient_age >= 70
 
+    def has_contact_category(self, categories, category):
+        return next((cat for cat in categories if cat['category'] == category),
+                    None) is not None
+
     def compute_results(self):
         result = ProtocolResult()
         if self.in_denominator():
@@ -66,11 +70,13 @@ class BannerAlertContacts(ClinicalQualityMeasure):
             release_of_info_contacts = []
             poa_contacts = []
             for contact in self.patient.patient.get('contacts', []):
-                # categories = contact.get('categories', [])
-                if contact.get('emergencyContact', False):
+                categories = contact.get('categories', [])
+                if self.has_contact_category(categories, 'EMC'):
                     emergency_contacts.append(contact)
-                if contact.get('authorizedForReleaseOfInformation', False):
+                if self.has_contact_category(categories, 'ARI'):
                     release_of_info_contacts.append(contact)
+                if self.has_contact_category(categories, 'POA'):
+                    poa_contacts.append(contact)
 
             num_emergency_contacts = len(emergency_contacts)
             num_release_contacts = len(release_of_info_contacts)
