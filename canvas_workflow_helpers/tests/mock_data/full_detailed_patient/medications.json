@@ -142,5 +142,23 @@
       }
     ],
     "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 9,
+    "created": "2022-02-16T23:17:47.593673Z",
+    "erxQuantity": 30.0,
+    "nationalDrugCode": "00078067615",
+    "potencyUnitCode": "C48542",
+    "status": "active",
+    "coding": [
+      {
+        "id": 1,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "312086",
+        "display": "ZOFRAN ODT 4 MG TABLET"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
   }
 ]

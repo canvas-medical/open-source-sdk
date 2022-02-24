@@ -165,5 +165,27 @@
       "assessedAndBilled": null
     },
     "periods": [{ "from": "2012-12-12", "to": null }]
+  },
+  {
+    "id": 7,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-23T03:33:13.204056Z",
+    "clinicalStatus": "active",
+    "committer": 2,
+    "coding": [
+      {
+        "id": 5,
+        "system": "ICD-10",
+        "version": "",
+        "code": "R112",
+        "display": "Nausea with vomiting, unspecified"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": null,
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2012-12-12", "to": null }]
   }
 ]
