@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "substance": {
+      "text": "Egg Derived",
+      "categoryId": 1,
+      "category": "Allergy Group",
+      "coding": [
+        {
+          "id": 1,
+          "userSelected": false,
+          "system": "http://www.fdbhealth.com/",
+          "version": "",
+          "code": "900508",
+          "display": "Egg Derived"
+        }
+      ]
+    },
+    "onsetDate": "2020-02-14",
+    "externallyExposableId": "5f81196f-a26f-484b-bcf2-119258c9730d",
+    "allergyIntoleranceType": "A",
+    "status": "active",
+    "severity": "mild",
+    "narrative": "severe"
+  }
+]

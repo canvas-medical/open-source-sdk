@@ -1,0 +1,66 @@
+[
+  {
+    "id": 11,
+    "isLocked": false,
+    "stateHistory": [
+      { "id": 21, "state": "SCH" },
+      { "id": 22, "state": "BKD" }
+    ],
+    "providerDisplay": {
+      "firstName": "Annalies",
+      "lastName": "Hines",
+      "key": "dbf184ad28a1408bbed184fc8fd2b029"
+    },
+    "location": { "id": 1, "fullName": "Canvas Clinic San Francisco" },
+    "appointments": [9],
+    "currentAppointmentId": 9
+  },
+  {
+    "id": 10,
+    "isLocked": false,
+    "stateHistory": [
+      { "id": 19, "state": "SCH" },
+      { "id": 20, "state": "BKD" }
+    ],
+    "providerDisplay": {
+      "firstName": "Annalies",
+      "lastName": "Hines",
+      "key": "dbf184ad28a1408bbed184fc8fd2b029"
+    },
+    "location": { "id": 1, "fullName": "Canvas Clinic San Francisco" },
+    "appointments": [8],
+    "currentAppointmentId": 8
+  },
+  {
+    "id": 7,
+    "isLocked": false,
+    "stateHistory": [
+      { "id": 13, "state": "SCH" },
+      { "id": 14, "state": "BKD" }
+    ],
+    "providerDisplay": {
+      "firstName": "Sam",
+      "lastName": "Tregar",
+      "key": "bb24f084e1fa46c7931663259540266d"
+    },
+    "location": { "id": 1, "fullName": "Canvas Clinic San Francisco" },
+    "appointments": [6],
+    "currentAppointmentId": 6
+  },
+  {
+    "id": 6,
+    "isLocked": false,
+    "stateHistory": [
+      { "id": 11, "state": "SCH" },
+      { "id": 12, "state": "BKD" }
+    ],
+    "providerDisplay": {
+      "firstName": "Sam",
+      "lastName": "Tregar",
+      "key": "bb24f084e1fa46c7931663259540266d"
+    },
+    "location": { "id": 1, "fullName": "Canvas Clinic San Francisco" },
+    "appointments": [5],
+    "currentAppointmentId": 5
+  }
+]

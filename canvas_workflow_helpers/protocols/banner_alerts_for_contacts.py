@@ -17,15 +17,15 @@ class BannerAlertContacts(ClinicalQualityMeasure):
 
         title = 'Banner Alert Contacts'
 
-        version = '2021-v1'
+        version = 'v1.0.0'
 
         description = 'Reminders about patients over the age of 70'
 
-        information = 'https://canvasmedical.com'
+        information = 'https://canvasmedical.com/'
 
         identifiers = ['BannerAlertContacts']
 
-        types = []
+        types = ['Alerts']
 
         responds_to_event_types = [
             events.HEALTH_MAINTENANCE,
@@ -36,6 +36,8 @@ class BannerAlertContacts(ClinicalQualityMeasure):
 
         references = ['Canvas Medical']
 
+        funding_source = ''
+
     rounded_patient_age = None
 
     def get_contact_display(self, contact):
@@ -45,10 +47,6 @@ class BannerAlertContacts(ClinicalQualityMeasure):
             display += f' ({relationship})'
         return display
 
-    def has_contact_category(self, categories, category):
-        return next((cat for cat in categories if cat['category'] == category),
-                    None) is not None
-
     def in_denominator(self):
         """
         Patients over the age of 70.
@@ -57,6 +55,10 @@ class BannerAlertContacts(ClinicalQualityMeasure):
         rounded_patient_age = math.floor(self.patient.age)
         self.rounded_patient_age = rounded_patient_age
         return rounded_patient_age >= 70
+
+    def has_contact_category(self, categories, category):
+        return next((cat for cat in categories if cat['category'] == category),
+                    None) is not None
 
     def compute_results(self):
         result = ProtocolResult()

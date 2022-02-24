@@ -1,0 +1,79 @@
+[
+  {
+    "id": 2,
+    "noteTimestamp": "2022-02-16 23:17:37.082929+00:00",
+    "name": "Diagnostic Assessment Tool",
+    "created": "2022-02-23T04:38:54.769884Z",
+    "committer": 2,
+    "status": "AC",
+    "progressStatus": "F",
+    "results": [],
+    "questionnaires": [
+      {
+        "id": 9,
+        "code": "PAT.QUESTIONNAIRE.2",
+        "codeSystem": "INTERNAL"
+      }
+    ],
+    "questions": [
+      {
+        "id": 34,
+        "questionResponseId": 5,
+        "code": "PAT.QUES.8",
+        "codeSystem": "INTERNAL",
+        "questionnaireId": 9
+      },
+      {
+        "id": 35,
+        "questionResponseId": 6,
+        "code": "PAT.QUES.9",
+        "codeSystem": "INTERNAL",
+        "questionnaireId": 9
+      },
+      {
+        "id": 36,
+        "questionResponseId": 7,
+        "code": "PAT.QUES.10",
+        "codeSystem": "INTERNAL",
+        "questionnaireId": 9
+      },
+      {
+        "id": 37,
+        "questionResponseId": 8,
+        "code": "PAT.QUES.11",
+        "codeSystem": "INTERNAL",
+        "questionnaireId": 9
+      }
+    ],
+    "responses": [
+      {
+        "id": 79,
+        "questionResponseId": 5,
+        "value": "Yes",
+        "code": "PAT.RES.1",
+        "codeSystem": "INTERNAL"
+      },
+      {
+        "id": 83,
+        "questionResponseId": 7,
+        "value": "Yes",
+        "code": "PAT.RES.1",
+        "codeSystem": "INTERNAL"
+      },
+      {
+        "id": 81,
+        "questionResponseId": 6,
+        "value": "Yes",
+        "code": "PAT.RES.1",
+        "codeSystem": "INTERNAL"
+      },
+      {
+        "id": 86,
+        "questionResponseId": 8,
+        "value": "No",
+        "code": "PAT.RES.2",
+        "codeSystem": "INTERNAL"
+      }
+    ]
+  }
+]

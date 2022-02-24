@@ -1,0 +1,55 @@
+{
+  "id": 3,
+  "created": "2022-02-23T03:19:23.339658Z",
+  "key": "3641d4bcd6d74b2089a43b097a25d377",
+  "firstName": "Sarah",
+  "lastName": "Pellegrino",
+  "birthDate": "1948-12-01",
+  "sexAtBirth": "F",
+  "sexualOrientationCode": "",
+  "genderIdentityCode": "",
+  "biologicalRaceCode": "",
+  "culturalEthnicityCode": "",
+  "active": true,
+  "deceased": false,
+  "deceasedDatetime": null,
+  "age": "73",
+  "timezone": "America/Los_Angeles",
+  "coverages": [],
+  "telecom": [
+    {
+      "system": "phone",
+      "primary": true,
+      "value": "0000000000",
+      "use": "home",
+      "rank": 0,
+      "state": "active",
+      "externallyExposableId": "368e5e62-5f29-411c-8649-efae2d147b61"
+    }
+  ],
+  "addresses": [],
+  "contacts": [
+    {
+      "name": "Harold",
+      "relationship": "Brother",
+      "phoneNumber": "0000000000",
+      "email": "test@testing.test",
+      "emergencyContact": false,
+      "authorizedForReleaseOfInformation": false,
+      "id": 4,
+      "categories": [
+        {
+          "id": 9,
+          "document": null,
+          "categoryDisplay": "Emergency contact",
+          "created": "2022-02-23T23:07:04.193258Z",
+          "modified": "2022-02-23T23:07:04.193279Z",
+          "category": "EMC"
+        }
+      ]
+    }
+  ],
+  "language": "English",
+  "externalIdentifiers": [],
+  "careTeamMemberships": []
+}

@@ -1,0 +1,164 @@
+[
+  {
+    "id": 1,
+    "created": "2022-02-16T23:17:47.593673Z",
+    "erxQuantity": 30.0,
+    "nationalDrugCode": "00078067919",
+    "potencyUnitCode": "C48542",
+    "status": "active",
+    "coding": [
+      {
+        "id": 1,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "104894",
+        "display": "ZOFRAN ODT 4 MG TABLET"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 2,
+    "created": "2022-02-16T23:17:59.043558Z",
+    "erxQuantity": 1.0,
+    "nationalDrugCode": "00641094831",
+    "potencyUnitCode": "C28254",
+    "status": "active",
+    "coding": [
+      {
+        "id": 2,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "992460",
+        "display": "PROMETHAZINE 25 MG/ML AMPUL"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 3,
+    "created": "2022-02-16T23:18:04.304787Z",
+    "erxQuantity": 1.0,
+    "nationalDrugCode": "00378075101",
+    "potencyUnitCode": "C48542",
+    "status": "active",
+    "coding": [
+      {
+        "id": 3,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "828348",
+        "display": "CYCLOBENZAPRINE 10 MG TABLET"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 4,
+    "created": "2022-02-16T23:18:19.794176Z",
+    "erxQuantity": 6.7,
+    "nationalDrugCode": "00085113201",
+    "potencyUnitCode": "C48155",
+    "status": "active",
+    "coding": [
+      {
+        "id": 4,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "745752",
+        "display": "PROVENTIL HFA 90 MCG INHALER"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 5,
+    "created": "2022-02-16T23:18:24.999249Z",
+    "erxQuantity": 1.0,
+    "nationalDrugCode": "50458092550",
+    "potencyUnitCode": "C48542",
+    "status": "active",
+    "coding": [
+      {
+        "id": 5,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "199885",
+        "display": "LEVAQUIN 500 MG TABLET"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 6,
+    "created": "2022-02-16T23:18:35.888559Z",
+    "erxQuantity": 14.0,
+    "nationalDrugCode": "00173069704",
+    "potencyUnitCode": "C54564",
+    "status": "active",
+    "coding": [
+      {
+        "id": 6,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "896222",
+        "display": "ADVAIR 500-50 DISKUS"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 7,
+    "created": "2022-02-16T23:18:41.722110Z",
+    "erxQuantity": 1.0,
+    "nationalDrugCode": "54092038701",
+    "potencyUnitCode": "C48480",
+    "status": "active",
+    "coding": [
+      {
+        "id": 7,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "861225",
+        "display": "ADDERALL XR 20 MG CAPSULE"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 8,
+    "created": "2022-02-16T23:18:52.252846Z",
+    "erxQuantity": 1.0,
+    "nationalDrugCode": "50458058601",
+    "potencyUnitCode": "C48542",
+    "status": "active",
+    "coding": [
+      {
+        "id": 8,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "1091185",
+        "display": "CONCERTA ER 36 MG TABLET"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  },
+  {
+    "id": 9,
+    "created": "2022-02-16T23:17:47.593673Z",
+    "erxQuantity": 30.0,
+    "nationalDrugCode": "00078067615",
+    "potencyUnitCode": "C48542",
+    "status": "active",
+    "coding": [
+      {
+        "id": 1,
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "",
+        "code": "312086",
+        "display": "ZOFRAN ODT 4 MG TABLET"
+      }
+    ],
+    "periods": [{ "from": null, "to": null }]
+  }
+]

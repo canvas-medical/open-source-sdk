@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1,
+    "dateRecorded": "2022-02-23T03:32:25.538179Z",
+    "value": "2048",
+    "loincNum": "29463-7",
+    "sign": "weight",
+    "units": "oz"
+  },
+  {
+    "id": 2,
+    "dateRecorded": "2022-02-23T03:32:25.651523Z",
+    "value": "98.6",
+    "loincNum": "8310-5",
+    "sign": "body_temperature",
+    "units": "\u00b0F"
+  },
+  {
+    "id": 3,
+    "dateRecorded": "2022-02-23T03:32:25.666489Z",
+    "value": "120/80",
+    "loincNum": "85354-9",
+    "sign": "blood_pressure",
+    "units": "mmHg"
+  },
+  {
+    "id": 4,
+    "dateRecorded": "2022-02-23T03:32:25.685585Z",
+    "value": "120",
+    "loincNum": "8480-6",
+    "sign": "systole",
+    "units": "mmHg"
+  },
+  {
+    "id": 5,
+    "dateRecorded": "2022-02-23T03:32:25.707125Z",
+    "value": "80",
+    "loincNum": "8462-4",
+    "sign": "diastole",
+    "units": "mmHg"
+  },
+  {
+    "id": 6,
+    "dateRecorded": "2022-02-23T03:32:25.724576Z",
+    "value": "",
+    "loincNum": "",
+    "sign": "pulse_rhythm",
+    "units": ""
+  },
+  {
+    "id": 7,
+    "dateRecorded": "2022-02-23T03:32:25.763692Z",
+    "value": "98",
+    "loincNum": "59408-5",
+    "sign": "oxygen_saturation",
+    "units": "%"
+  },
+  {
+    "id": 8,
+    "dateRecorded": "2022-02-23T03:32:25.783799Z",
+    "value": "98",
+    "loincNum": "3150-0",
+    "sign": "inhaled_oxygen_concentration",
+    "units": "%"
+  },
+  {
+    "id": 9,
+    "dateRecorded": "2022-02-23T03:32:25.798481Z",
+    "value": "",
+    "loincNum": "3151-8",
+    "sign": "inhaled_oxygen_flow_rate",
+    "units": "L/min"
+  },
+  {
+    "id": 10,
+    "dateRecorded": "2022-02-23T03:32:25.808737Z",
+    "value": "80",
+    "loincNum": "8302-2",
+    "sign": "height",
+    "units": "in"
+  },
+  {
+    "id": 11,
+    "dateRecorded": "2022-02-23T03:32:25.922058Z",
+    "value": "80",
+    "loincNum": "56086-2",
+    "sign": "waist_circumference",
+    "units": "cm"
+  },
+  {
+    "id": 12,
+    "dateRecorded": "2022-02-23T03:32:25.933336Z",
+    "value": "72",
+    "loincNum": "8867-4",
+    "sign": "pulse",
+    "units": "bpm"
+  },
+  {
+    "id": 13,
+    "dateRecorded": "2022-02-23T03:32:25.943045Z",
+    "value": "22",
+    "loincNum": "9279-1",
+    "sign": "respiration_rate",
+    "units": "bpm"
+  },
+  {
+    "id": 14,
+    "dateRecorded": "2022-02-23T03:32:25.952079Z",
+    "value": "",
+    "loincNum": "80339-5",
+    "sign": "note",
+    "units": ""
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": 9,
+    "reasonForVisit": "",
+    "state": {
+      "id": 22,
+      "display": "Larry Weed booked this note 3\u00a0days, 6\u00a0hours ago on 02-18-22.",
+      "note": 11,
+      "created": "2022-02-18T18:13:40.635715Z",
+      "modified": "2022-02-18T18:13:40.635730Z",
+      "state": "BKD",
+      "originator": 2
+    },
+    "providerName": "Annalies Hines NP",
+    "startTime": "2022-02-21T20:30:00Z",
+    "durationMinutes": 20,
+    "appointmentType": "office",
+    "status": "unconfirmed",
+    "provider": 5,
+    "externallyExposableId": "b449d984-2fab-448c-b88c-6affc5c67db0"
+  },
+  {
+    "id": 8,
+    "reasonForVisit": "",
+    "state": {
+      "id": 20,
+      "display": "Larry Weed booked this note 3\u00a0days, 6\u00a0hours ago on 02-18-22.",
+      "note": 10,
+      "created": "2022-02-18T18:09:38.260721Z",
+      "modified": "2022-02-18T18:09:38.260823Z",
+      "state": "BKD",
+      "originator": 2
+    },
+    "providerName": "Annalies Hines NP",
+    "startTime": "2022-02-22T18:45:00Z",
+    "durationMinutes": 20,
+    "appointmentType": "office",
+    "status": "unconfirmed",
+    "provider": 5,
+    "externallyExposableId": "2827c7b9-6a75-4bf6-b9ae-09c0461a0393"
+  },
+  {
+    "id": 5,
+    "reasonForVisit": "",
+    "state": {
+      "id": 12,
+      "display": "Larry Weed booked this note 4\u00a0days, 1\u00a0hour ago on 02-17-22.",
+      "note": 6,
+      "created": "2022-02-17T23:15:13.707452Z",
+      "modified": "2022-02-17T23:15:13.707462Z",
+      "state": "BKD",
+      "originator": 2
+    },
+    "providerName": "Sam Tregar DO",
+    "startTime": "2022-02-23T21:00:00Z",
+    "durationMinutes": 20,
+    "appointmentType": "office",
+    "status": "unconfirmed",
+    "provider": 18,
+    "externallyExposableId": "47071b01-12c1-4105-9e6c-8d3916d0d812"
+  },
+  {
+    "id": 6,
+    "reasonForVisit": "",
+    "state": {
+      "id": 14,
+      "display": "Larry Weed booked this note 4\u00a0days ago on 02-17-22.",
+      "note": 7,
+      "created": "2022-02-17T23:36:01.987565Z",
+      "modified": "2022-02-17T23:36:01.987575Z",
+      "state": "BKD",
+      "originator": 2
+    },
+    "providerName": "Sam Tregar DO",
+    "startTime": "2022-02-23T22:30:00Z",
+    "durationMinutes": 20,
+    "appointmentType": "office",
+    "status": "unconfirmed",
+    "provider": 18,
+    "externallyExposableId": "b476d491-0e2a-45c5-811d-fd9afcd955d4"
+  }
+]

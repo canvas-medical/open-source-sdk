@@ -1,0 +1,198 @@
+[
+  {
+    "id": 1,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-16T23:17:37.092005Z",
+    "clinicalStatus": "active",
+    "committer": 10,
+    "coding": [
+      {
+        "id": 1,
+        "system": "ICD-10",
+        "version": "",
+        "code": "B349",
+        "display": "Viral infection, unspecified"
+      },
+      {
+        "id": 2,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "707129008",
+        "display": "Viral infection, unspecified"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": "2022-02-16T23:17:37.082929Z",
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2016-07-22", "to": null }]
+  },
+  {
+    "id": 2,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-16T23:17:52.633982Z",
+    "clinicalStatus": "active",
+    "committer": 10,
+    "coding": [
+      {
+        "id": 3,
+        "system": "ICD-10",
+        "version": "",
+        "code": "R51",
+        "display": "Headache"
+      },
+      {
+        "id": 4,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "404684003",
+        "display": "Headache"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": "2022-02-16T23:17:37.082929Z",
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2020-01-30", "to": null }]
+  },
+  {
+    "id": 3,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-16T23:18:09.337153Z",
+    "clinicalStatus": "active",
+    "committer": 10,
+    "coding": [
+      {
+        "id": 5,
+        "system": "ICD-10",
+        "version": "",
+        "code": "J069",
+        "display": "Acute upper respiratory infection, unspecified"
+      },
+      {
+        "id": 6,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "78337007",
+        "display": "Acute upper respiratory infection, unspecified"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": "2022-02-16T23:17:37.082929Z",
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2019-12-10", "to": null }]
+  },
+  {
+    "id": 4,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-16T23:18:35.032156Z",
+    "clinicalStatus": "active",
+    "committer": 10,
+    "coding": [
+      {
+        "id": 7,
+        "system": "ICD-10",
+        "version": "",
+        "code": "J45909",
+        "display": "Unspecified asthma, uncomplicated"
+      },
+      {
+        "id": 8,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "390921001",
+        "display": "Unspecified asthma, uncomplicated"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": "2022-02-16T23:17:37.082929Z",
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2020-01-30", "to": null }]
+  },
+  {
+    "id": 5,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-16T23:18:36.090908Z",
+    "clinicalStatus": "active",
+    "committer": 10,
+    "coding": [
+      {
+        "id": 9,
+        "system": "ICD-10",
+        "version": "",
+        "code": "F909",
+        "display": "Attention-deficit hyperactivity disorder, unspecified type"
+      },
+      {
+        "id": 10,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "46745001",
+        "display": "Attention-deficit hyperactivity disorder, unspecified type"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": "2022-02-16T23:17:37.082929Z",
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2021-03-19", "to": null }]
+  },
+  {
+    "id": 7,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-23T03:33:13.204056Z",
+    "clinicalStatus": "active",
+    "committer": 2,
+    "coding": [
+      {
+        "id": 5,
+        "system": "ICD-10",
+        "version": "",
+        "code": "R112",
+        "display": "Nausea with vomiting, unspecified"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": null,
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2012-12-12", "to": null }]
+  },
+  {
+    "id": 9,
+    "noteTimestamp": "2022-02-16T23:17:37.082929Z",
+    "created": "2022-02-16T23:18:36.090908Z",
+    "clinicalStatus": "active",
+    "committer": 10,
+    "coding": [
+      {
+        "id": 9,
+        "system": "ICD-10",
+        "version": "",
+        "code": "E6601",
+        "display": "Morbid Obesity"
+      },
+      {
+        "id": 10,
+        "system": "http://snomed.info/sct",
+        "version": "",
+        "code": "238136002",
+        "display": "Morbid Obesity"
+      }
+    ],
+    "lastTimestamps": {
+      "assessed": "2022-02-16T23:17:37.082929Z",
+      "billed": null,
+      "assessedAndBilled": null
+    },
+    "periods": [{ "from": "2021-03-19", "to": null }]
+  }
+]

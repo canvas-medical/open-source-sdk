@@ -1,0 +1,60 @@
+{
+  "id": 1,
+  "created": "2022-02-16T23:17:36.917592Z",
+  "key": "da3dffbe18cc441f9f92da4da8e1c231",
+  "firstName": "Oluwaseyi \ud83d\ude38\ufe0f",
+  "lastName": "Longabaugh",
+  "birthDate": "2009-03-09",
+  "sexAtBirth": "M",
+  "sexualOrientationCode": "",
+  "genderIdentityCode": "",
+  "biologicalRaceCode": "",
+  "culturalEthnicityCode": "",
+  "active": true,
+  "deceased": false,
+  "deceasedDatetime": null,
+  "age": "12",
+  "timezone": "America/Los_Angeles",
+  "coverages": [],
+  "telecom": [
+    {
+      "system": "phone",
+      "primary": false,
+      "value": "7070816419",
+      "use": "mobile",
+      "rank": 1,
+      "state": "active",
+      "externallyExposableId": "0ac47777-f48a-4660-a018-8994ea7f04cc"
+    },
+    {
+      "system": "email",
+      "primary": false,
+      "value": "test.patient+Oluwaseyi \ud83d\ude38\ufe0f.Longabaugh@canvasmedical.com",
+      "use": "home",
+      "rank": 1,
+      "state": "active",
+      "externallyExposableId": "b1a1be47-1503-424e-8f83-2e17b243de7b"
+    }
+  ],
+  "addresses": [
+    {
+      "use": "home",
+      "type": "both",
+      "text": "3391 Gurwitz Ave Oakland CA 94577",
+      "period": { "start": null, "end": null },
+      "line": ["3391 Gurwitz Ave", ""],
+      "country": "",
+      "city": "Oakland",
+      "district": "",
+      "stateCode": "CA",
+      "postalCode": "94577",
+      "state": "active",
+      "externallyExposableId": "e52e0e5d-fcce-4803-982a-201687f63c06"
+    }
+  ],
+  "contacts": [],
+  "language": "English",
+  "pcp": "Mel van Londen",
+  "externalIdentifiers": [{ "value": "72342334" }],
+  "careTeamMemberships": []
+}
