@@ -1,16 +1,13 @@
 name: Workflow helpers
 on:
   push:
+    branches: [main]
+  pull_request:
     paths-ignore:
       # Don't bother testing if we're only updating the changelog.
       - "**.md"
     branches:
       - "**"
-
-push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   workflow-helpers:
