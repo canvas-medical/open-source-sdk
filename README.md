@@ -1,6 +1,6 @@
 ## Welcome to Canvas Medical's open source SDK
 
-This repository is meant to support developers who are customizing their Canvas environments using the [canvas-workflow-kit](https://docs.canvasmedical.com/docs/sdk-quickstart).
+This repository is meant to support developers who are customizing their Canvas environments using the [canvas-workflow-kit](https://docs.canvasmedical.com/docs/sdk-quickstart). Installing the dependencies in this repo will also install `canvas-workflow-kit`.
 
 This open source project is new, and we will be updating this documentation as we grow. :bug::butterfly:
 
@@ -16,7 +16,7 @@ Here are examples of different protocols you can find in this repo:
 - On appointment update or creation, send a notification to an external server with relevant information about the appointment.
 - On patient data change, show a protocol in each patient's chart with useful patient links for the clinical user.
 
-For instructions on how to create, test, and upload protocols, please see our [documentation](https://docs.canvasmedical.com/docs/sdk-create-a-protocol).
+For instructions on how to create, test, and upload protocols, please see our [documentation](https://docs.canvasmedical.com/docs/sdk-quickstart#initial-setup).
 
 ### Value Sets
 
@@ -57,9 +57,9 @@ We encourage developers to fork this repo and share their custom protocols and V
 
 ## Getting Started
 
-At Canvas Medical, we use [Poetry](https://python-poetry.org/) for packaging and dependency management.
+At Canvas Medical, we use [Poetry](https://python-poetry.org/) for packaging and dependency management. Please follow the documentation to _install Poetry_.
 
-Fork this repo & `git clone git@github.com:canvas-medical/open-source-sdk.git`
+**_Fork this repo_** then clone it into a directory named `open-source-sdk`
 
 from the `open-source-sdk` directory run
 
@@ -67,13 +67,26 @@ from the `open-source-sdk` directory run
 $ poetry install
 ```
 
-This will also install `canvas-workflow-kit`. Please follow the configuration instructions found in the [documentation](https://docs.canvasmedical.com/docs/canvas-cli#settings).
+By default Poetry creates a virtual environment with all of the project dependencies.
+To use the installed dependencies, activate the new environment by running
+
+```
+$ poetry shell
+```
+
+Verify the `canvas-workflow-kit` command options once you are in the poetry shell by running
+
+```
+(env)$ canvas-cli
+```
+
+Please follow the configuration instructions found in the [documentation](https://docs.canvasmedical.com/docs/canvas-cli#settings) to make sure you can submit to your Canvas instance using `canvas-cli`.
 
 The protocol examples found in [`open-source-sdks/canvas_workflow_helpers/protocols`](https://github.com/canvas-medical/open-source-sdk/tree/main/canvas_workflow_helpers/protocols) can all be uploaded to your canvas instance by running
 
 ```
-$ cd canvas_workflow_helpers/protocols
-$ canvas-cli upload FILENAME
+(env)$ cd canvas_workflow_helpers/protocols
+(env)$ canvas-cli upload FILENAME
 ```
 
 All documentation and details on each protocol are available [here](https://docs.canvasmedical.com/docs/protocol-examples).
@@ -84,6 +97,8 @@ You can use any of the value sets found in [`open-source-sdks/canvas_workflow_he
 ```
 from canvas_workflow_sdk.value_set.v2021 import Hba1CLaboratoryTest
 ```
+
+To get out of the poetry shell just enter `exit`
 
 ## Contributing
 
