@@ -14,7 +14,7 @@ Please never include any PHI when submitting examples. Revealing PHI would direc
 
 ## What should I know before I get started?
 
-Canvas Medical open source is designed to support developers customizing their Canvas instances. At present, this open source project is meant to support users of the [canvas-workflow-kit](https://docs.canvasmedical.com/docs/sdk-quickstart). Currently, the SDK is not compatible with our self-serve sandbox environments and only supports customers who have a live environment. We are in the process of putting the final touches on making these resources available to all. In the meantime, [contact us](https://www.canvasmedical.com/contact) to get a head start. Then make sure to go through our [getting started documentation](https://docs.canvasmedical.com/docs/introduction).
+Canvas Medical open source is designed to support developers customizing their Canvas instances. At present, this open source project is meant to support users of the [canvas-workflow-kit](https://docs.canvasmedical.com/docs/sdk-quickstart).
 
 You understand that by contributing work to the Canvas Medical Open Source project (“Contributions”), those Contributions become a part of the Canvas Medical Open Source project, and that we may use your Contributions without limitation, including to modify or improve Canvas Medical’s existing products or services, or to create new products or services. If we choose to incorporate any of your Contributions into Canvas Medical’s products or services, you understand that you will have no rights to those new or improved products or services, and that in no way are we required to relicense products or services into which we incorporate Contributions on any Open Source Terms.
 
