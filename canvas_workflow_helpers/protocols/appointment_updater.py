@@ -15,7 +15,7 @@ class AppointmentUpdate(ClinicalQualityMeasure):
 
         version = 'v1.0.0'
 
-        description = 'Adds a meeting link to an appointment after it is created'
+        description = 'Adds a meeting link to a Telehealth appointment after it is created'
 
         information = 'https://canvasmedical.com/'
 
