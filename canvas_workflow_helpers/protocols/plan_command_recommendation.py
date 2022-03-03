@@ -52,7 +52,8 @@ class PlanCommand(ClinicalQualityMeasure):
             result.due_in = -1
             result.status = STATUS_DUE
             result.add_narrative(
-                f"Lets make a plan for {self.patient.first_name}'s obesity")
+                f"Lets make a plan for {self.patient.first_name}'s weight management"
+            )
             result.add_recommendation(
                 PlanRecommendation(
                     key='PLAN_COMMAND',
@@ -60,5 +61,7 @@ class PlanCommand(ClinicalQualityMeasure):
                     button='Plan',
                     patient=self.patient,
                     title='Insert a health plan',
-                    narrative='Eat healthy and walk three times a week'))
+                    narrative=
+                    'Consult with nutritionist and exercise for 30-60 minutes daily'
+                ))
         return result
