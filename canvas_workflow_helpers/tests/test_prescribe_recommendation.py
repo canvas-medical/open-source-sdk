@@ -74,7 +74,9 @@ class PrescribeButtonTest(WorkflowHelpersBaseTest):
         self.assertEqual(STATUS_DUE, result.status)
         self.assertIsInstance(result.recommendations[0],
                               PrescribeRecommendation)
-        self.assertEqual('Prescribe zofran!', result.narrative)
+        self.assertEqual(
+            'Review medical history and consider Zofran prescription.',
+            result.narrative)
         self.assertEqual(-1, result.due_in)
         self.assertIsNone(result.next_review)
 
