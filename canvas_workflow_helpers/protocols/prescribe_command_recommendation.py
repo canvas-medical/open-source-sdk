@@ -86,7 +86,8 @@ class PrescribeButton(ClinicalQualityMeasure):
             else:
                 result.due_in = -1
                 result.status = STATUS_DUE
-                result.add_narrative('Prescribe zofran!')
+                result.add_narrative(
+                    'Review medical history and consider Zofran prescription.')
                 title = 'Zofran 8 mg tablet'
                 prescribe_recommendation = PrescribeRecommendation(
                     key='RECOMMEND_ZOFRAN',

@@ -35,7 +35,7 @@ class AppointmentUpdaterTest(WorkflowHelpersBaseTest):
     def test_fields(self):
         Protocol = self.appointment_class
         self.assertEqual(
-            'Adds a meeting link to an appointment after it is created',
+            'Adds a meeting link to a Telehealth appointment after it is created',
             Protocol._meta.description)
         self.assertEqual('Appointment Update', Protocol._meta.title)
         self.assertEqual('v1.0.0', Protocol._meta.version)

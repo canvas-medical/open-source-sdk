@@ -57,7 +57,7 @@ class PlanComandTest(WorkflowHelpersBaseTest):
         self.assertIsInstance(result, ProtocolResult)
         self.assertEqual(STATUS_DUE, result.status)
         self.assertIsInstance(result.recommendations[0], PlanRecommendation)
-        self.assertEqual("Lets make a plan for Darey's obesity",
+        self.assertEqual("Lets make a plan for Darey's weight management",
                          result.narrative)
         self.assertEqual(-1, result.due_in)
         self.assertIsNone(result.next_review)
