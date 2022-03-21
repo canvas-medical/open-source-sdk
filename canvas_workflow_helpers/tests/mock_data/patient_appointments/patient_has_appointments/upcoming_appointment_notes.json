@@ -3,8 +3,22 @@
     "id": 11,
     "isLocked": false,
     "stateHistory": [
-      { "id": 21, "state": "SCH" },
-      { "id": 22, "state": "BKD" }
+      {
+        "id": 51,
+        "state": "SCH"
+      },
+      {
+        "id": 52,
+        "state": "BKD"
+      },
+      {
+        "id": 63,
+        "state": "SCH"
+      },
+      {
+        "id": 64,
+        "state": "BKD"
+      }
     ],
     "providerDisplay": {
       "firstName": "Annalies",

@@ -75,13 +75,6 @@ class AppointmentUpdaterTest(WorkflowHelpersBaseTest):
         self.assertEqual(30, result.days_of_notice)
         self.assertIsNone(result.next_review)
 
-    """
-    The rest of these functions tested depend on context = {}
-    Currently there is a bug where context = 'report', but the pr is almost ready to merge
-    Once fix is merged, add more tests
-    For now, just test that these do not error
-    """
-
     def test_get_new_field_value(self):
         tested_no_appointments = self.no_appointment_class
         none_given_none = tested_no_appointments.get_new_field_value(None)

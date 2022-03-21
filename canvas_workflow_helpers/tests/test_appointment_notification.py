@@ -76,26 +76,34 @@ class AppointmentNotificationTest(WorkflowHelpersBaseTest):
         self.assertEqual(30, result.days_of_notice)
         self.assertIsNone(result.next_review)
 
-    """
-    The rest of these functions tested depend on context = {}
-    Currently there is a bug where context = 'report', but the pr is almost ready to merge
-    Once fix is merged, add more tests
-    For now, just test that these do not error
-    """
-
     def test_appointment_note_has_a_previously_booked_appointment(self):
         tested_no_appointments = self.no_appointment_class
-        expected_false_given_none = tested_no_appointments.appointment_note_has_a_previously_booked_appointment(
-            None)
+        test_appointments = self.appointment_class
 
-        self.assertFalse(expected_false_given_none)
+        no_appointment_expected_false_given_none = tested_no_appointments.appointment_note_has_a_previously_booked_appointment(
+            None)
+        no_appointment_expected_false_given_id = tested_no_appointments.appointment_note_has_a_previously_booked_appointment(
+            11)
+        appointments_expect_true_given_id = test_appointments.appointment_note_has_a_previously_booked_appointment(
+            11)
+        appointments_expect_false = test_appointments.appointment_note_has_a_previously_booked_appointment(
+            6)
+
+        self.assertFalse(no_appointment_expected_false_given_none)
+        self.assertFalse(no_appointment_expected_false_given_id)
+        self.assertTrue(appointments_expect_true_given_id)
+        self.assertFalse(appointments_expect_false)
 
     def test_get_appointment_from_note_id(self):
         tested_no_appointments = self.no_appointment_class
+        test_appointments = self.appointment_class
+
         expect_none_given_none = tested_no_appointments.get_appointment_from_note_id(
             None)
+        expect_object = test_appointments.get_appointment_from_note_id(11)
 
         self.assertIsNone(expect_none_given_none)
+        self.assertIsNotNone(expect_object)
 
     def test_get_new_field_value(self):
         tested_no_appointments = self.no_appointment_class
@@ -105,6 +113,38 @@ class AppointmentNotificationTest(WorkflowHelpersBaseTest):
 
     def test_get_record_by_id(self):
         tested_no_appointments = self.no_appointment_class
+        test_appointments = self.appointment_class
         empty_given_none = tested_no_appointments.get_record_by_id(None, None)
+        no_error_given_id = tested_no_appointments.get_record_by_id(
+            tested_no_appointments.patient.upcoming_appointment_notes, 11)
+        not_empty_given_appointment = test_appointments.get_record_by_id(
+            test_appointments.patient.upcoming_appointment_notes, 6)
 
         self.assertEqual({}, empty_given_none)
+        self.assertEqual({}, no_error_given_id)
+        self.assertEqual(
+            not_empty_given_appointment, {
+                "id":
+                6,
+                "isLocked":
+                False,
+                "stateHistory": [{
+                    "id": 11,
+                    "state": "SCH"
+                }, {
+                    "id": 12,
+                    "state": "BKD"
+                }],
+                "providerDisplay": {
+                    "firstName": "Sam",
+                    "lastName": "Tregar",
+                    "key": "bb24f084e1fa46c7931663259540266d"
+                },
+                "location": {
+                    "id": 1,
+                    "fullName": "Canvas Clinic San Francisco"
+                },
+                "appointments": [5],
+                "currentAppointmentId":
+                5
+            })
