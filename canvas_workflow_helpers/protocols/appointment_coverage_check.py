@@ -23,7 +23,7 @@ class AppointmentCoverageCheck(ClinicalQualityMeasure):
 
         information = 'https://canvasmedical.com/'
 
-        identifiers = ['AppointmentTaskCreator']
+        identifiers = ['AppointmentCoverageCheck']
 
         types = ['Task']
 

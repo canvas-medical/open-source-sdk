@@ -13,5 +13,6 @@
   "active": true,
   "deceased": false,
   "deceasedDatetime": null,
+  "coverages": [],
   "age": "58"
 }

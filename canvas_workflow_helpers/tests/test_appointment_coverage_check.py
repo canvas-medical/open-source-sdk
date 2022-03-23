@@ -8,7 +8,7 @@ from canvas_workflow_kit.protocol import (ProtocolResult,
                                           STATUS_NOT_APPLICABLE)
 
 
-class AppointmentTaskCreatorTest(WorkflowHelpersBaseTest):
+class AppointmentCoverageTests(WorkflowHelpersBaseTest):
 
     def setUp(self):
         super().setUp()
@@ -27,7 +27,7 @@ class AppointmentTaskCreatorTest(WorkflowHelpersBaseTest):
 
     def createProtocolClass(self):
         template_path = Path(
-            __file__).parent.parent / 'protocols/appointment_task_creator.py'
+            __file__).parent.parent / 'protocols/appointment_coverage_check.py'
         template = template_path.open('r').read()
 
         return parse_class_from_python_source(template)
@@ -35,13 +35,13 @@ class AppointmentTaskCreatorTest(WorkflowHelpersBaseTest):
     def test_fields(self):
         Protocol = self.appointment_class
         self.assertEqual(
-            'Listens for appointment creates and generates a task.',
+            'Listens for appointment creates and generates a task if patient does not have coverage.',
             Protocol._meta.description)
-        self.assertEqual('Appointment Task Creator', Protocol._meta.title)
+        self.assertEqual('Appointment Coverage Check', Protocol._meta.title)
         self.assertEqual('v1.0.0', Protocol._meta.version)
         self.assertEqual('https://canvasmedical.com/',
                          Protocol._meta.information)
-        self.assertEqual(['AppointmentTaskCreator'],
+        self.assertEqual(['AppointmentCoverageCheck'],
                          Protocol._meta.identifiers)
         self.assertEqual(['Task'], Protocol._meta.types)
         self.assertEqual([events.HEALTH_MAINTENANCE],
