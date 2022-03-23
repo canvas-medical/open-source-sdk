@@ -42,8 +42,8 @@ def affected_population(self):
 The v2021 value sets are maintained by the [Agency for Healthcare Research and Quality](https://www.hcup-us.ahrq.gov/) (or AHRQ) and is updated throughout the year to return the most up-to-date results. Some scenarios may require a custom value set not present in the v2021 set.
 
 :construction: **_Note_** :construction:
-We are working on making this open source repo a project on PyPI. Once `open-source-sdk` is a project on PyPI, any custom value set merged into the repository can be imported and used in any protocol.
-Until then, this is how you can import v2021 value sets:
+This `open-source-SDK` contains `canvas-workflow-helpers`, which is publicly available through PyPI. We are working on integrating `canvas-workflow-helpers` into `canvas-workflow-kit` to make using your own value sets inside custom protocols easier.
+Until that integration is complete, this is how you can import v2021 value sets:
 
 ```
 from canvas_workflow_sdk.value_set.v2021 import Hba1CLaboratoryTest

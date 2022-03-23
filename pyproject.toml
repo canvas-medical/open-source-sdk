@@ -7,7 +7,7 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-canvas-workflow-kit = "^0.4.5"
+canvas-workflow-kit = "^0.5.1"
 arrow = "^1.2.2"
 
 [tool.poetry.dev-dependencies]
