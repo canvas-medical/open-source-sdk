@@ -10,7 +10,7 @@ from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
 
 class AppointmentCoverageCheck(ClinicalQualityMeasure):
     """
-    Protocol that listens for appointment creates and generates a task.
+    Protocol that listens for appointment creates and generates a task if patient does not have coverage.
     """
 
     class Meta:
@@ -23,7 +23,7 @@ class AppointmentCoverageCheck(ClinicalQualityMeasure):
 
         information = 'https://canvasmedical.com/'
 
-        identifiers = ['AppointmentTaskCreator']
+        identifiers = ['AppointmentCoverageCheck']
 
         types = ['Task']
 
