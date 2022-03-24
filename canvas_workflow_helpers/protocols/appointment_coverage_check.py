@@ -92,8 +92,8 @@ class AppointmentCoverageCheck(ClinicalQualityMeasure):
             if provider_key is None:
                 return result  # not able to assign a task without a provider_key
 
-            patient_key = self.patient.patient['key']
-            first_name = self.patient.patient['firstName']
+            patient_key = self.patient.patient.patient_key
+            first_name = self.patient.first_name
             if appointment_start_time:
                 appt_day = arrow.get(appointment_start_time).format(
                     'YYYY - MM - DD')
