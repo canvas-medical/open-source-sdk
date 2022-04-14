@@ -62,12 +62,10 @@ class AppointmentNotification(ClinicalQualityMeasure):
         return None
 
     def get_new_field_value(self, field_name):
-        if hasattr(self.context, 'get'):
-            change_context_fields = self.context['change_info']['fields']
-            if field_name not in change_context_fields:
-                return None
-            return change_context_fields[field_name][1]
-        return None
+        change_context_fields = self.field_changes.get('fields', {})
+        if field_name not in change_context_fields:
+            return None
+        return change_context_fields[field_name][1]
 
     def get_record_by_id(self, recordset, id):
         if recordset is not None:
@@ -78,7 +76,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
 
     @property
     def patient_external_id(self):
-        external_identifiers = self.patient.patient['externalIdentifiers']
+        external_identifiers = self.patient.patient.get('externalIdentifiers', [])
         if len(external_identifiers):
             return external_identifiers[0]['value']
         return ''
@@ -99,9 +97,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        if not hasattr(self.context, 'get'):
-            return result
-        change_context = self.context.get('change_info')
+        change_context = self.field_changes
         payload = self.base_payload
         changed_model = change_context.get('model_name', '')
 
@@ -122,12 +118,12 @@ class AppointmentNotification(ClinicalQualityMeasure):
         elif changed_model == 'appointment':
             appointment_start_time = self.get_new_field_value('start_time')
             payload = {
-                **payload, 'appointment_external_id':
-                change_context['external_id'],
+                **payload,
+                'appointment_external_id': change_context.get('external_id'),
                 'start_time': appointment_start_time
             }
 
-            created = change_context['created']
+            created = change_context.get('created')
             if created:
                 appointment_note_id = self.get_new_field_value('note_id')
                 rescheduled = self.appointment_note_has_a_previously_booked_appointment(
