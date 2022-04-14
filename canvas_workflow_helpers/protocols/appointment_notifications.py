@@ -76,7 +76,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
 
     @property
     def patient_external_id(self):
-        external_identifiers = self.patient.patient['externalIdentifiers']
+        external_identifiers = self.patient.patient.get('externalIdentifiers')
         if len(external_identifiers):
             return external_identifiers[0]['value']
         return ''
