@@ -57,7 +57,7 @@ class AppointmentCoverageCheck(ClinicalQualityMeasure):
         return {}
 
     def get_new_field_value(self, field_name):
-        change_context_fields = self.field_changes['fields']
+        change_context_fields = self.field_changes.get('fields', {})
         if field_name not in change_context_fields:
             return None
         return change_context_fields[field_name][1]
@@ -67,8 +67,8 @@ class AppointmentCoverageCheck(ClinicalQualityMeasure):
         if not change_context:
             return False
 
-        changed_model = change_context['model_name']
-        created = change_context['created']
+        changed_model = change_context.get('model_name')
+        created = change_context.get('created')
         # we only care about appointments that have been created
         if changed_model != 'appointment' or not created:
             return False

@@ -62,7 +62,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
         return None
 
     def get_new_field_value(self, field_name):
-        change_context_fields = self.field_changes['fields']
+        change_context_fields = self.field_changes.get('fields', {})
         if field_name not in change_context_fields:
             return None
         return change_context_fields[field_name][1]
@@ -118,12 +118,12 @@ class AppointmentNotification(ClinicalQualityMeasure):
         elif changed_model == 'appointment':
             appointment_start_time = self.get_new_field_value('start_time')
             payload = {
-                **payload, 'appointment_external_id':
-                change_context['external_id'],
+                **payload,
+                'appointment_external_id': change_context.get('external_id'),
                 'start_time': appointment_start_time
             }
 
-            created = change_context['created']
+            created = change_context.get('created')
             if created:
                 appointment_note_id = self.get_new_field_value('note_id')
                 rescheduled = self.appointment_note_has_a_previously_booked_appointment(
