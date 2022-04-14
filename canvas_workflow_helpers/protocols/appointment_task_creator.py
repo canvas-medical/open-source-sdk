@@ -57,26 +57,22 @@ class AppointmentTaskCreator(ClinicalQualityMeasure):
         return {}
 
     def get_new_field_value(self, field_name):
-        if hasattr(self.context, 'get'):
-            change_context_fields = self.context['change_info']['fields']
-            if field_name not in change_context_fields:
-                return None
-            return change_context_fields[field_name][1]
-        return None
+        change_context_fields = self.field_changes['fields']
+        if field_name not in change_context_fields:
+            return None
+        return change_context_fields[field_name][1]
 
     def is_appointment_and_created(self):
-        if hasattr(self.context, 'get'):
-            change_context = self.context.get('change_info')
-            if not change_context:
-                return False
+        change_context = self.field_changes
+        if not change_context:
+            return False
 
-            changed_model = change_context['model_name']
-            created = change_context['created']
-            # we only care about appointments that have been created
-            if changed_model != 'appointment' or not created:
-                return False
-            return True
-        return False
+        changed_model = change_context['model_name']
+        created = change_context['created']
+        # we only care about appointments that have been created
+        if changed_model != 'appointment' or not created:
+            return False
+        return True
 
     def compute_results(self):
         result = ProtocolResult()

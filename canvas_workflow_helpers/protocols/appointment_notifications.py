@@ -62,12 +62,10 @@ class AppointmentNotification(ClinicalQualityMeasure):
         return None
 
     def get_new_field_value(self, field_name):
-        if hasattr(self.context, 'get'):
-            change_context_fields = self.context['change_info']['fields']
-            if field_name not in change_context_fields:
-                return None
-            return change_context_fields[field_name][1]
-        return None
+        change_context_fields = self.field_changes['fields']
+        if field_name not in change_context_fields:
+            return None
+        return change_context_fields[field_name][1]
 
     def get_record_by_id(self, recordset, id):
         if recordset is not None:
@@ -99,9 +97,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        if not hasattr(self.context, 'get'):
-            return result
-        change_context = self.context.get('change_info')
+        change_context = self.field_changes
         payload = self.base_payload
         changed_model = change_context.get('model_name', '')
 

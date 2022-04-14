@@ -40,20 +40,16 @@ class AppointmentUpdate(ClinicalQualityMeasure):
     meeting_link = 'https://www.google.com/search?q=video+call'
 
     def get_new_field_value(self, field_name):
-        if hasattr(self.context, 'get'):
-            change_context_fields = self.context['change_info']['fields']
-            if field_name not in change_context_fields:
-                return None
-            return change_context_fields[field_name][1]
-        return None
+        change_context_fields = self.field_changes['fields']
+        if field_name not in change_context_fields:
+            return None
+        return change_context_fields[field_name][1]
 
     def compute_results(self):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        if not hasattr(self.context, 'get'):
-            return result
-        change_context = self.context.get('change_info')
+        change_context = self.field_changes
 
         changed_model = change_context['model_name']
         created = change_context['created']
