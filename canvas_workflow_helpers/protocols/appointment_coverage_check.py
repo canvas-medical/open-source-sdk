@@ -102,6 +102,9 @@ class AppointmentCoverageCheck(ClinicalQualityMeasure):
             update_payload = {
                 'integration_type': 'Task',
                 'integration_source': '',
+                'handling_options': {
+                    'respond_async': False
+                },
                 'patient_identifier': {
                     'identifier_type': 'key',
                     'identifier': {
