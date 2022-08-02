@@ -69,20 +69,17 @@ class PatientGrouping(ClinicalQualityMeasure):
         result.status = STATUS_NOT_APPLICABLE
        
         patient_key = self.patient.patient['key']
-        patient_group = self.patient.groups.filter(name=self.GROUP_NAME).records
-        
-        group_key = ''
-        if not patient_group:
-            return result
 
-        group_key = patient_group[0]['externallyExposableId']
+        # Get this UUID from the api_patientgroup.externally_exposable_id field
+        patient_group_uuid = 'bb0d3a51-fad4-4500-a42d-fe87079ac2c7'
+
 
         # This particular group operates on an opt-out policy, so a patient should be 
         # in the group unless they have the opt out consent
         if self.has_opt_out():
-            group_update = ensure_patient_not_in_group(patient_key, group_key)
+            group_update = ensure_patient_not_in_group(patient_key, patient_group_uuid)
         else:
-            group_update = ensure_patient_in_group(patient_key, group_key)
+            group_update = ensure_patient_in_group(patient_key, patient_group_uuid)
 
         self.set_updates([group_update])
 
