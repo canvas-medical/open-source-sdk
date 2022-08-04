@@ -20,8 +20,8 @@ class PatientGrouping(ClinicalQualityMeasure):
     This particular example is of an opt-out based group membership.
     """
 
-    GROUP_NAME = 'LANES'
-    CONSENT_CODE = 'LANES_CONSENT'
+    # Consent codes can be found in the Admin view
+    CONSENT_CODE = '<CODING_FOR_CONSENT>'
 
     class Meta:
         title = 'Patient Grouping'
@@ -71,7 +71,7 @@ class PatientGrouping(ClinicalQualityMeasure):
         patient_key = self.patient.patient['key']
 
         # Get this UUID from the api_patientgroup.externally_exposable_id field
-        patient_group_uuid = 'bb0d3a51-fad4-4500-a42d-fe87079ac2c7'
+        patient_group_uuid = '<UUID_OF_PATIENT_GROUP>'
 
 
         # This particular group operates on an opt-out policy, so a patient should be 
