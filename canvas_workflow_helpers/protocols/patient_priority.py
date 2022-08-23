@@ -15,17 +15,23 @@ from canvas_workflow_kit.value_set.value_set import ValueSet
 
 
 class QuestionnaireRisk(ValueSet):
-
+    
+    """ 
+     This ValueSet will define the specific Questionnaire that is needed to determine patient's priority. 
+    """
+    
+    # VALUE_SET_NAME can be set to a display name for the Questionnaire we are trying to identify
     VALUE_SET_NAME = '@Risk Questionnaire'
 
+    # The name of this variable needs to match the coding system of the questionnaire (i.e. INTERNAL), 
+    # while the single value in the set represents the questionnaire's code. These values were passed during Questionnaire Loading
     INTERNAL = {'Risk_Stratification'}
 
-    
 
 class PatientPriority(ClinicalQualityMeasure):
     """
-    Protocol that displays patient priority based on latest risk stratification from Internal @Risk questionnaire, 
-    if the patient has any. There is currently no action to take, so no recommendations are made.
+    Protocol that displays patient priority based on latest risk stratification
+    from Internal @Risk questionnaire, if the patient has any.
     """
 
     SATISFIED_VALUES = ('GREEN', 'YELLOW')
@@ -36,8 +42,7 @@ class PatientPriority(ClinicalQualityMeasure):
         version = '1.0.0'
 
         description = (
-            'Protocol that displays patient priority based on Risk Questionnaire. '
-            'There is currently no action to take, so no recommendations are made.')
+            'Protocol that displays patient priority based on Risk Questionnaire.')
 
         identifiers = ['PatientPriority']
 
@@ -82,7 +87,6 @@ class PatientPriority(ClinicalQualityMeasure):
 
         return score_string
 
-
     def compute_results(self) -> ProtocolResult:
 
         result = ProtocolResult()
@@ -94,4 +98,4 @@ class PatientPriority(ClinicalQualityMeasure):
                 result.status = STATUS_DUE
 
         return result
-      
+

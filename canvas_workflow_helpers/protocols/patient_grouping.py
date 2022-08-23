@@ -13,7 +13,6 @@ from canvas_workflow_kit.protocol import (
 )
 
 
-
 class PatientGrouping(ClinicalQualityMeasure):
     """
     Protocol that updates a patients membership in a group depending on a given consent. 
@@ -21,7 +20,7 @@ class PatientGrouping(ClinicalQualityMeasure):
     """
 
     # Consent codes can be found in the Admin view
-    CONSENT_CODE = 'A0001' # replace with your opt-out consent's coding
+    CONSENT_CODE = 'A0001'  # replace with your opt-out consent's coding
 
     class Meta:
         title = 'Patient Grouping'
@@ -54,13 +53,12 @@ class PatientGrouping(ClinicalQualityMeasure):
 
         references = ['Written by Canvas']
 
-
     def has_opt_out(self) -> bool:
         consents = self.patient.consents.filter(category__code=self.CONSENT_CODE)
         
         if consents:
             state = consents[0]['state']
-            return True if state == 'rejected' else False
+            return state == 'rejected'
 
         return False
 
@@ -71,11 +69,10 @@ class PatientGrouping(ClinicalQualityMeasure):
         patient_key = self.patient.patient['key']
 
         # Get this UUID from the api_group.externally_exposable_id field
-        patient_group_uuid = '00000000-0000-0000-0000-000000000000' # Replace with your group's UUID.
-
+        patient_group_uuid = '00000000-0000-0000-0000-000000000000'  # Replace with your group's UUID.
 
         # This particular group operates on an opt-out policy, so a patient should be 
-        # in the group unless they have the opt out consent
+        # in the group unless they have the opt-out consent
         if self.has_opt_out():
             group_update = ensure_patient_not_in_group(patient_key, patient_group_uuid)
         else:
