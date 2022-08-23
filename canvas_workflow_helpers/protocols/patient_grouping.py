@@ -21,7 +21,7 @@ class PatientGrouping(ClinicalQualityMeasure):
     """
 
     # Consent codes can be found in the Admin view
-    CONSENT_CODE = '<CODING_FOR_CONSENT>'
+    CONSENT_CODE = 'A0001' # replace with your opt-out consent's coding
 
     class Meta:
         title = 'Patient Grouping'
@@ -70,8 +70,8 @@ class PatientGrouping(ClinicalQualityMeasure):
        
         patient_key = self.patient.patient['key']
 
-        # Get this UUID from the api_patientgroup.externally_exposable_id field
-        patient_group_uuid = '<UUID_OF_PATIENT_GROUP>'
+        # Get this UUID from the api_group.externally_exposable_id field
+        patient_group_uuid = '00000000-0000-0000-0000-000000000000' # Replace with your group's UUID.
 
 
         # This particular group operates on an opt-out policy, so a patient should be 
