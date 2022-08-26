@@ -104,7 +104,6 @@ class PrescribeButton(ClinicalQualityMeasure):
                 ]
                 prescribe_recommendation.context = {
                     'conditions': [conditions],
-                    'dosage_form': 'tablet',
                     'sig_original_input': '1 tab po bid',
                     'duration_in_days': 10,
                     'dispense_quantity': 20,
