@@ -74,6 +74,13 @@ class AppointmentNotification(ClinicalQualityMeasure):
                 return json.loads(json.dumps(recordset_filter[0], default=str))
         return {}
 
+    def get_appointment_by_note_state_event(self, _id):
+        for apt in self.patient.appointments:
+            state_id = apt.get('state', {}).get('id')
+            if state_id == _id:
+                return json.loads(json.dumps(apt, default=str))
+        return {}
+
     @property
     def patient_external_id(self):
         external_identifiers = self.patient.patient.get('externalIdentifiers', [])
@@ -89,8 +96,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
         }
 
     # REPLACE this url with your server url which should receive these notifications
-    notification_url = 'http://cfc4-76-224-185-72.ngrok.io'
-
+    notification_url = 'https://webhook.site/a018a2b8-ab4a-4692-8e78-503cb3f2cb9c'
     headers = {'Content-Type': 'application/json'}
 
     def compute_results(self):
@@ -102,17 +108,32 @@ class AppointmentNotification(ClinicalQualityMeasure):
         changed_model = change_context.get('model_name', '')
 
         if changed_model == 'notestatechangeevent':
-            cancelled = self.get_new_field_value('state') == 'CLD'
-            # we only care about cancelled state changes
-            if not cancelled:
+            state = self.get_new_field_value('state')
+            cancelled = state == 'CLD'
+            no_show = state == 'NSW'
+            reverted = state == 'RVT'
+            check_in = state == 'CVD'
+
+            # we only care about cancelled, no-show, reverted, or check-in state changes
+            if not (cancelled or no_show or reverted or check_in):
                 return result
 
-            appointment = self.get_appointment_from_note_id(
-                self.get_new_field_value('note_id'))
+            if check_in:
+                appointment = self.get_appointment_by_note_state_event(self.field_changes['canvas_id'])
+                payload = {**payload, 'checked_in': True}
+            else:
+                appointment = self.get_appointment_from_note_id(
+                    self.get_new_field_value('note_id'))
+                if cancelled:
+                    payload = {**payload, 'cancelled': True}
+                elif reverted:
+                    payload = {**payload, 'reverted': True}
+                elif no_show:
+                    payload = {**payload, 'no_show': True}
+
             payload = {
-                **payload, 'cancelled': True,
-                'appointment_external_id':
-                appointment.get('externallyExposableId')
+                **payload,
+                'appointment_external_id': appointment.get('externallyExposableId')
             }
 
         elif changed_model == 'appointment':
