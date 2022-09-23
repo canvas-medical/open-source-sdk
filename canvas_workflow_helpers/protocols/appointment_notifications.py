@@ -109,31 +109,23 @@ class AppointmentNotification(ClinicalQualityMeasure):
 
         if changed_model == 'notestatechangeevent':
             state = self.get_new_field_value('state')
-            cancelled = state == 'CLD'
-            no_show = state == 'NSW'
-            reverted = state == 'RVT'
-            check_in = state == 'CVD'
+            state_map = {
+                'CLD': 'cancelled',
+                'NSW': 'no_show',
+                'RVT': 'reverted',
+                'CVD': 'checked_in'
+            }
 
             # we only care about cancelled, no-show, reverted, or check-in state changes
-            if not (cancelled or no_show or reverted or check_in):
+            if state not in state_map:
                 return result
 
-            if check_in:
-                appointment = self.get_appointment_by_note_state_event(self.field_changes['canvas_id'])
-                payload = {**payload, 'checked_in': True}
-            else:
-                appointment = self.get_appointment_from_note_id(
-                    self.get_new_field_value('note_id'))
-                if cancelled:
-                    payload = {**payload, 'cancelled': True}
-                elif reverted:
-                    payload = {**payload, 'reverted': True}
-                elif no_show:
-                    payload = {**payload, 'no_show': True}
+            appointment = self.get_appointment_by_note_state_event(self.field_changes['canvas_id'])
 
             payload = {
                 **payload,
                 'appointment_external_id': appointment.get('externallyExposableId')
+                state_map[state]: True
             }
 
         elif changed_model == 'appointment':
