@@ -6,6 +6,8 @@ from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
                                           ProtocolResult)
+from canvas_workflow_kit.internal.integration_messages import create_task_payload
+
 
 
 class AppointmentTaskCreator(ClinicalQualityMeasure):
@@ -21,10 +23,6 @@ class AppointmentTaskCreator(ClinicalQualityMeasure):
 
         description = 'Listens for appointment creates and generates a task.'
 
-        information = 'https://canvasmedical.com/'
-
-        identifiers = ['AppointmentTaskCreator']
-
         types = ['Task']
 
         responds_to_event_types = [
@@ -33,36 +31,18 @@ class AppointmentTaskCreator(ClinicalQualityMeasure):
 
         compute_on_change_types = [CHANGE_TYPE.APPOINTMENT]
 
-        authors = ['Canvas Medical']
+    # This is a hard-coded team identifier that is always responsible calling patients
+    # You can normally get this ID from our FHIR Group Search endpoint
+    TEAM_IDENTIFIER = '0564c236-9ebe-43e2-8f21-c8e28f6d60c3'
 
-        references = ['Canvas Medical']
-
-        funding_source = ''
-
-        notification_only = True
-
-    def find_provider_key(self):
-        appointment_note_id = self.get_new_field_value('note_id')
-        if self.patient.upcoming_appointment_notes:
-            appointment_note = self.get_record_by_id(
-                self.patient.upcoming_appointment_notes, appointment_note_id)
-            return appointment_note.get('providerDisplay', {}).get('key')
-        return None
-
-    def get_record_by_id(self, recordset, id):
+    def get_record(self, recordset, identifiers):
         if recordset is not None:
-            recordset_filter = recordset.filter(id=id)
+            recordset_filter = recordset.filter(**identifiers)
             if recordset_filter:
                 return json.loads(json.dumps(recordset_filter[0], default=str))
         return {}
 
-    def get_new_field_value(self, field_name):
-        change_context_fields = self.field_changes.get('fields', {})
-        if field_name not in change_context_fields:
-            return None
-        return change_context_fields[field_name][1]
-
-    def is_appointment_and_created(self):
+    def get_newly_created_appointment(self):
         change_context = self.field_changes
         if not change_context:
             return False
@@ -72,59 +52,46 @@ class AppointmentTaskCreator(ClinicalQualityMeasure):
         # we only care about appointments that have been created
         if changed_model != 'appointment' or not created:
             return False
-        return True
+        return change_context['canvas_id']
 
     def compute_results(self):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        if self.is_appointment_and_created():
-            appointment_start_time = self.get_new_field_value('start_time')
+        apt_id = self.get_newly_created_appointment()
+        if apt_id:
+            appointment = self.get_record(
+                self.patient.upcoming_appointments, {'id': apt_id})
 
-            provider_key = self.find_provider_key()
-            if provider_key is None:
-                return result  # not able to assign a task without a provider_key
+            appointment_note = self.get_record(
+                self.patient.upcoming_appointment_notes, {'currentAppointmentId': apt_id})
 
-            patient_key = self.patient.patient['key']
+            if not appointment:
+                return result
+
+            provider_key = appointment_note.get('providerDisplay', {}).get('key')
+            appointment_start_time = appointment.get('startTime')
+
+            if provider_key is None or appointment_start_time is None:
+                return result
+
             first_name = self.patient.patient['firstName']
-            if appointment_start_time:
-                appt_day = arrow.get(appointment_start_time).format(
-                    'YYYY - MM - DD')
-                due = arrow.get(appointment_start_time).shift(
-                    days=-3).isoformat()
-            else:
-                appt_day = 'unknown date'
-                due = 'three days before scheduled appointment'
+            appt_day = arrow.get(appointment_start_time).format('YYYY-MM-DD')
+            due = arrow.get(appointment_start_time).shift(days=-3).isoformat()
 
-            update_payload = {
-                'integration_type': 'Task',
-                'integration_source': '',
-                'patient_identifier': {
-                    'identifier_type': 'key',
-                    'identifier': {
-                        'key': patient_key
-                    }
-                },
-                'integration_payload': {
-                    'creator': {
-                        'identifier_type': 'key',
-                        'identifier': {
-                            'key': provider_key
-                        }
-                    },
-                    'assignee': {
-                        'identifier_type': 'key',
-                        'identifier': {
-                            'key': provider_key
-                        }
-                    },
-                    'title':
-                    f'{first_name} has an appointment on {appt_day}. Please call to remind!',
-                    'due': due,
-                    'status': 'OPEN'
-                }
-            }
+            task_payload = create_task_payload(
+                patient_key=self.patient.patient['key'],
+                created_by_key=provider_key,
+                status="OPEN", # This can be anything from the list ["COMPLETED", "CLOSED", "OPEN"]
+                title=f'{first_name} has an appointment on {appt_day}. Please call to remind!',
+                assignee_identifier=provider_key,
+                team_identifier=self.TEAM_IDENTIFIER,
+                due=due,
+                created=arrow.now().isoformat(),
+                tag=None,
+                labels=["Urgent"]
+            )
 
-            self.set_updates([update_payload])
+            self.set_updates([task_payload])
 
         return result
