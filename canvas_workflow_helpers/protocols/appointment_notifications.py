@@ -92,7 +92,8 @@ class AppointmentNotification(ClinicalQualityMeasure):
     def base_payload(self):
         return {
             'canvas_patient_key': self.patient.patient['key'],
-            'external_patient_id': self.patient_external_id
+            'external_patient_id': self.patient_external_id,
+            'field_chagnes': self.field_changes
         }
 
     # REPLACE this url with your server url which should receive these notifications
@@ -124,7 +125,7 @@ class AppointmentNotification(ClinicalQualityMeasure):
 
             payload = {
                 **payload,
-                'appointment_external_id': appointment.get('externallyExposableId')
+                'appointment_external_id': appointment.get('externallyExposableId'),
                 state_map[state]: True
             }
 
