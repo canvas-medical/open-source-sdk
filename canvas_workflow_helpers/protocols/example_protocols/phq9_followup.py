@@ -89,7 +89,6 @@ class PHQ9(ClinicalQualityMeasure):
         )
 
     def compute_results(self):
-        """ """
         result = ProtocolResult()
         if self.in_denominator():
             if self.in_numerator():
