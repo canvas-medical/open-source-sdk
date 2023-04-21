@@ -60,7 +60,11 @@ class PHQ9(ClinicalQualityMeasure):
         Patients with most recent PHQ9 score >= 10
 
         """
-        phq9_ques = self.patient.interviews.find(QuestionnairePhq9).last()
+        phq9_ques = (
+            self.patient.interviews.find(QuestionnairePhq9)
+            .filter(status="AC", progressStatus="F")
+            .last()
+        )
         if not phq9_ques:
             return False
 
@@ -98,7 +102,6 @@ class PHQ9(ClinicalQualityMeasure):
                 result.status = STATUS_DUE
 
                 narrative = f"{self.patient.first_name}'s most recent PHQ-9 score is {self.score}."
-                date = arrow.now().shift(days=7).format("YYYY-MM-DD")
                 follow_up_recommendation = FollowUpRecommendation(
                     key="RECOMMEND_FOLLOW_UP",
                     rank=1,
@@ -107,7 +110,9 @@ class PHQ9(ClinicalQualityMeasure):
                     title=f"Follow Up with {self.patient.first_name}",
                     narrative=narrative,
                     context={
-                        "requested_date": date,
+                        "requested_date": arrow.now()
+                        .shift(days=7)
+                        .format("YYYY-MM-DD"),
                         "internal_comment": "Elevated PHQ-9.",
                         "requested_note_type": BEHAVIORAL_HEALTH_NOTE_TYPE_PK,
                     },
