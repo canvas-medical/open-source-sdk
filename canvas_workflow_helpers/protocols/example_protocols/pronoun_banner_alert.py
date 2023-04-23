@@ -54,7 +54,7 @@ class PronounBannerAlert(ClinicalQualityMeasure):
             (
                 q.get("questionResponseId")
                 for q in questionnaire.get("questions", [])
-                if q.get("code") == "QPRONOUNS"
+                if q.get("code") == "90778-2"
             ),
             None,
         )
