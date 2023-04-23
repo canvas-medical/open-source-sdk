@@ -302,7 +302,7 @@ class BreastCancerScreening(ClinicalQualityMeasure):
                     button="Order",
                     patient=self.patient,
                     imaging=MammographyImaging,
-                    title="Order screening mammogram",
+                    title="Order Mammography, screening; bilateral",
                     context={"conditions": [[EncounterForMammographCondition]]},
                 )
         else:

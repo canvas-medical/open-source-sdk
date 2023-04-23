@@ -20,6 +20,16 @@ class ScreeningForCervicalCancer(ValueSet):
     ICD10CM = {"Z12.4"}
 
 
+class HpvTestOrder(ValueSet):
+    VALUE_SET_NAME = "HPV DNA, LOW/HIGH RISK"
+    CPT = {"36453"}
+
+
+class PapTestOrder(ValueSet):
+    VALUE_SET_NAME = "THINPREP PAP AND HR HPV DNA"
+    CPT = {"92089"}
+
+
 EncounterForPapCondition = {
     "code": "Z12.4",
     "system": "ICD-10",
@@ -129,7 +139,7 @@ class CervicalCancerScreening(ClinicalQualityMeasure):
                     condition=ScreeningForCervicalCancer,
                     title="Order pap test",
                     narrative=result.narrative,
-                    lab=PapTest,
+                    lab=PapTestOrder,
                     context={"conditions": [[EncounterForPapCondition]]},
                 )
 
@@ -141,7 +151,7 @@ class CervicalCancerScreening(ClinicalQualityMeasure):
                     condition=ScreeningForHPV,
                     title="Order HPV test",
                     narrative=result.narrative,
-                    lab=HpvTest,
+                    lab=HpvTestOrder,
                     context={"conditions": [[EncounterForHPVScreeningCondition]]},
                 )
                 result.add_recommendation(hpv_recommendation)
