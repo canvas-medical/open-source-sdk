@@ -22,12 +22,12 @@ class ScreeningForCervicalCancer(ValueSet):
 
 class HpvTestOrder(ValueSet):
     VALUE_SET_NAME = "HPV DNA, LOW/HIGH RISK"
-    CPT = {"36453"}
+    CPT = {"87624"}
 
 
 class PapTestOrder(ValueSet):
     VALUE_SET_NAME = "THINPREP PAP AND HR HPV DNA"
-    CPT = {"92089"}
+    CPT = {"88142"}
 
 
 EncounterForPapCondition = {
@@ -140,7 +140,10 @@ class CervicalCancerScreening(ClinicalQualityMeasure):
                     title="Order pap test",
                     narrative=result.narrative,
                     lab=PapTestOrder,
-                    context={"conditions": [[EncounterForPapCondition]]},
+                    context={
+                        "conditions": [[EncounterForPapCondition]],
+                        "health_gorilla_order_codes": ["92089"]
+                    },
                 )
 
                 result.add_recommendation(pap_recommendation)
@@ -152,7 +155,10 @@ class CervicalCancerScreening(ClinicalQualityMeasure):
                     title="Order HPV test",
                     narrative=result.narrative,
                     lab=HpvTestOrder,
-                    context={"conditions": [[EncounterForHPVScreeningCondition]]},
+                    context={
+                        "conditions": [[EncounterForHPVScreeningCondition]],
+                        "health_gorilla_order_codes": ["36453"],
+                    },
                 )
                 result.add_recommendation(hpv_recommendation)
 

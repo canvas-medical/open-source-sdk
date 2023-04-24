@@ -48,9 +48,7 @@ class PHQ9HistoryBannerAlert(ClinicalQualityMeasure):
         return f"{date}: {int(score)}"
 
     def get_last_three_phq9(self):
-        return self.patient.interviews.find(QuestionnairePhq9).filter(
-            status="AC", progressStatus="F"
-        )[-3:][::-1]
+        return self.patient.interviews.find(QuestionnairePhq9)[-3:][::-1]
 
     def compute_results(self):
         result = ProtocolResult()

@@ -63,11 +63,10 @@ class PHQ9(ClinicalQualityMeasure):
         grant_type = "client_credentials"
         client_id = self.settings.CLIENT_ID
         client_secret = self.settings.CLIENT_SECRET
-        instance_name = self.settings.INSTANCE_NAME
 
         token_response = requests.request(
             "POST",
-            f'https://{self.INSTANCE_NAME}.canvasmedical.com/auth/token/',
+            f'https://{self.instance_name}.canvasmedical.com/auth/token/',
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}"
         )
@@ -77,8 +76,8 @@ class PHQ9(ClinicalQualityMeasure):
     def get_fhir_appointments(self):
         """ Given a Task ID we can perform a FHIR Task Search Request"""
         return requests.get(
-            (f"https://fhir-{self.INSTANCE_NAME}.canvasmedical.com/"
-            "Appointment?date=ge{self.interview_time[:10]}&patient=Patient/{self.patient.patient_key}"),
+            (f"https://fhir-{self.instance_name}.canvasmedical.com/"
+             f"Appointment?date=ge{self.interview_time[:10]}&patient=Patient/{self.patient.patient_key}"),
             headers={
                 'Authorization': f'Bearer {self.get_fhir_api_token()}',
                 'accept': 'application/json'
@@ -136,6 +135,8 @@ class PHQ9(ClinicalQualityMeasure):
     def compute_results(self):
         """ """
         result = ProtocolResult()
+
+        self.instance_name = self.settings.INSTANCE_NAME
         if self.in_denominator():
             if self.in_numerator():
                 result.status = STATUS_SATISFIED

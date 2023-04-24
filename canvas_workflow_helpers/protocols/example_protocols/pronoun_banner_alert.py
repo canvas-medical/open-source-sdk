@@ -43,7 +43,6 @@ class PronounBannerAlert(ClinicalQualityMeasure):
     def get_pronoun_questionnaire(self):
         return (
             self.patient.interviews.find(PronounQuestionnaire)
-            .filter(progressStatus="F", status="AC")
             .last()
         )
 
