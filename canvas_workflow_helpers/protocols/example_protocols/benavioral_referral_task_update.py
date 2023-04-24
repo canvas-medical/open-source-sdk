@@ -32,13 +32,13 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
 
         notification_only = True
 
-        token = None
-        task_id = None
+    token = None
+    task_id = None
 
-        behavioral_group_fhir_id = "Group/a588ba00-cc4f-4651-829b-4abf17803f89"
-        behavioral_group_name = "Behavioral Health Coordinators"
-        internal_referral_label = "Internal Referral"
-        referral_task_title = "Refer patient to Psychiatry (TBD)"
+    behavioral_group_fhir_id = "Group/895037a1-98ea-432b-a42b-5727a40ba2ca"
+    behavioral_group_name = "Behavioral Health Coordinators"
+    internal_referral_label = "Internal Referral"
+    referral_task_title = "Refer patient to Psychiatry (TBD)"
 
     def get_fhir_api_token(self):
         """Given the Client ID and Client Secret for authentication to FHIR,
@@ -136,12 +136,12 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         result = ProtocolResult()
 
         field_changes = self.field_changes or {}
-        task_id = field_changes.get("external_id")
+        task_id = str(field_changes.get("external_id", ""))
         created = field_changes.get("created") == True
         if not created or not task_id or not self.is_a_referral_task(task_id):
             return result
 
-        self.task_id = str(task_id)
+        self.task_id = task_id
         if not (task := self.get_fhir_task()):
             return result
 
