@@ -115,11 +115,10 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         }
         input = [*task.get("input", []), new_input]
 
-        new_task = task | {"extension": extension, "input": input}
-        # remove owner
-        return {k: v for k, v in new_task.items() if k != "owner"}
+        return task | {"extension": extension, "input": input}
 
     def is_a_referral_task(self, task_id):
+        """Returns true if the task has the title given to Behavioral Referral tasks"""
         return (
             len(
                 self.patient.tasks.filter(
