@@ -44,9 +44,6 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         """Given the Client ID and Client Secret for authentication to FHIR,
         return a bearer token"""
 
-        if not self.token:
-            return None
-
         grant_type = "client_credentials"
         client_id = self.settings.CLIENT_ID
         client_secret = self.settings.CLIENT_SECRET
