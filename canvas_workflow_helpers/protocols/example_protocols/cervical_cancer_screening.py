@@ -7,7 +7,7 @@ from canvas_workflow_kit.protocol import (
     STATUS_SATISFIED,
 )
 from canvas_workflow_kit.constants import CHANGE_TYPE
-from canvas_workflow_kit.recommendation import LabRecommendation
+from canvas_workflow_kit.recommendation import LabRecommendation, ReferRecommendation
 from canvas_workflow_kit.value_set.v2022.procedure import (
     HysterectomyWithNoResidualCervix,
 )
@@ -46,6 +46,16 @@ EncounterForHPVScreeningCondition = {
     "code": "Z11.51",
     "system": "ICD-10",
     "display": "Encounter for screening for human papillomavirus (HPV)",
+}
+
+class Obstetrics_Gynecology(ValueSet):
+    VALUE_SET_NAME = "Obstetrics & Gynecology (TBD)"
+
+
+EncounterForGynecologicalExamCondition = {
+    "code": "Z014.19",
+    "system": "ICD-10",
+    "display": "Encounter for gynecological examination (general) (routine) without abnormal findings",
 }
 
 
@@ -161,5 +171,21 @@ class CervicalCancerScreening(ClinicalQualityMeasure):
                     },
                 )
                 result.add_recommendation(hpv_recommendation)
+
+                refer_recommendation = ReferRecommendation(
+                    key='RECOMMEND_REFER_COLONOSCOPY',
+                    rank=3,
+                    button='Refer',
+                    patient=self.patient,
+                    referral=Obstetrics_Gynecology,
+                    condition=EncounterForGynecologicalExamCondition,
+                    title='Refer for a Obstetrics & Gynecology',
+                    context={
+                    'specialties': ['Obstetrics & Gynecology'],
+                    'conditions': [[EncounterForGynecologicalExamCondition]]}
+                )
+                result.add_recommendation(refer_recommendation)
+
+
 
         return result

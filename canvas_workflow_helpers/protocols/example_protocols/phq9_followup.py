@@ -9,7 +9,7 @@ from canvas_workflow_kit.protocol import (
     ClinicalQualityMeasure,
     ProtocolResult,
 )
-from canvas_workflow_kit.recommendation import FollowUpRecommendation
+from canvas_workflow_kit.recommendation import FollowUpRecommendation, ReferRecommendation
 from canvas_workflow_kit.value_set.value_set import ValueSet
 
 
@@ -17,8 +17,17 @@ class QuestionnairePhq9(ValueSet):
     VALUE_SET_NAME = "PHQ-9 Questionnaire"
     LOINC = {"44249-1"}
 
+class Psychology(ValueSet):
+    VALUE_SET_NAME = "Psychology (TBD)"
 
-BEHAVIORAL_HEALTH_NOTE_TYPE_CODE = 'BH'
+
+EncounterForDepressionCondition = {
+    "code": "F32A",
+    "system": "ICD-10",
+    "display": "Depression, unspecified",
+}
+
+PRIMARY_CARE_NOTE_TYPE_CODE = 'PRIMCARE'
 APPOINTMENT_CANCELLED_STATUSES = [
     "cancelled",
     "noshowed",
@@ -49,7 +58,7 @@ class PHQ9(ClinicalQualityMeasure):
             events.HEALTH_MAINTENANCE,
         ]
 
-        compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.APPOINTMENT]
+        compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.APPOINTMENT, CHANGE_TYPE.REFERRAL_REPORT]
 
         authors = ["Canvas Example Medical Association (CEMA)"]
 
@@ -106,9 +115,27 @@ class PHQ9(ClinicalQualityMeasure):
         return bool(score)
 
     def in_numerator(self):
+        self.has_follow_up_apt = self._has_follow_up_apt()
+        self.has_psychology_referral = self._has_psychology_referral()
+
+        return self.has_psychology_referral and self.has_follow_up_apt
+
+    def _has_psychology_referral(self):
+
+        referrals = self.patient.referral_reports.filter(
+            originalDate__gte=self.interview_time[:10], specialty="Psychology"
+        )
+
+        if len(referrals):
+            return True
+
+        return False
+
+
+    def _has_follow_up_apt(self):
         # Patients that have a follow-up behavioral health appointment scheduled in the future
         bh_appts = self.patient.upcoming_appointments.filter(
-            startTime__gt=self.interview_time, noteType__code=BEHAVIORAL_HEALTH_NOTE_TYPE_CODE
+            startTime__gt=self.interview_time, noteType__code=PRIMARY_CARE_NOTE_TYPE_CODE
         )
 
         if any(
@@ -126,7 +153,7 @@ class PHQ9(ClinicalQualityMeasure):
             apt_code = apt['resource']['appointmentType']['coding'][0]['code']
             start_time = arrow.get(apt['resource']['start'])
             status = apt['resource']['status']
-            if (apt_code == BEHAVIORAL_HEALTH_NOTE_TYPE_CODE and
+            if (apt_code == PRIMARY_CARE_NOTE_TYPE_CODE and
                 start_time > arrow.get(self.interview_time) and
                 status not in APPOINTMENT_CANCELLED_STATUSES):
                 return True
@@ -136,8 +163,10 @@ class PHQ9(ClinicalQualityMeasure):
         """ """
         result = ProtocolResult()
 
+
         self.instance_name = self.settings.INSTANCE_NAME
         if self.in_denominator():
+
             if self.in_numerator():
                 result.status = STATUS_SATISFIED
             else:
@@ -145,21 +174,39 @@ class PHQ9(ClinicalQualityMeasure):
                 result.status = STATUS_DUE
 
                 narrative = f"{self.patient.first_name}'s most recent PHQ-9 score is {self.score}."
-                date = arrow.now().shift(days=7).format("YYYY-MM-DD")
-                follow_up_recommendation = FollowUpRecommendation(
-                    key="RECOMMEND_FOLLOW_UP",
-                    rank=1,
-                    button="Follow up",
-                    patient=self.patient,
-                    title=f"Follow Up with {self.patient.first_name}",
-                    narrative=narrative,
-                    context={
-                        "requested_date": date,
-                        "internal_comment": "Elevated PHQ-9.",
-                        "requested_note_type": BEHAVIORAL_HEALTH_NOTE_TYPE_CODE,
-                    },
-                )
-                result.add_recommendation(follow_up_recommendation)
                 result.add_narrative(narrative)
+
+                date = arrow.now().shift(days=7*6).format("YYYY-MM-DD")
+
+                if not self.has_follow_up_apt:
+                    follow_up_recommendation = FollowUpRecommendation(
+                        key="RECOMMEND_FOLLOW_UP",
+                        rank=1,
+                        button="Follow up",
+                        patient=self.patient,
+                        title=f"Follow Up with {self.patient.first_name}",
+                        narrative=narrative,
+                        context={
+                            "requested_date": date,
+                            "internal_comment": "Elevated PHQ-9.",
+                            "requested_note_type": PRIMARY_CARE_NOTE_TYPE_CODE,
+                        },
+                    )
+                    result.add_recommendation(follow_up_recommendation)
+
+                if not self.has_psychology_referral:
+                    refer_recommendation = ReferRecommendation(
+                        key='RECOMMEND_REFER_PSYCHOLOGY',
+                        rank=3,
+                        button='Refer',
+                        patient=self.patient,
+                        referral=Psychology,
+                        condition=EncounterForDepressionCondition,
+                        title='Refer for Psychology',
+                        context={
+                        'specialties': ['Psychology'],
+                        'conditions': [[EncounterForDepressionCondition]]}
+                    )
+                    result.add_recommendation(refer_recommendation)
 
         return result
