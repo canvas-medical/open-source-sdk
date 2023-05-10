@@ -89,7 +89,7 @@ class DepressionDiagnosis(ClinicalQualityMeasure):
                 result.due_in = -1
                 result.status = STATUS_DUE
 
-                narrative = f"{self.patient.first_name} has recently completed an elevated PHQ-9"
+                narrative = f"{self.patient.first_name} has recently completed an elevated PHQ-9, consider diagnosing the patient with the following condition:"
                 result.add_narrative(narrative)
 
                 diagnose_recommendation = DiagnoseRecommendation(
@@ -98,7 +98,7 @@ class DepressionDiagnosis(ClinicalQualityMeasure):
                     button='Diagnose',
                     patient=self.patient,
                     condition=Depression,
-                    title='Consider diagnosis of depression',
+                    title=Depression.VALUE_SET_NAME,
                 )
                 result.add_recommendation(diagnose_recommendation)
 
