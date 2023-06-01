@@ -100,7 +100,7 @@ class DepressionPrescribeRecommendations(ClinicalQualityMeasure):
                 if self.prescibed_other_meds:
                     result.add_narrative(f'{self.patient.first_name} has been prescribed with a non recommended medication')
                     interview_recommendation = InterviewRecommendation(
-                                key='RECOMMEND_PRESCRIBB_REASONING_QUES',
+                                key='RECOMMEND_PRESCRIBE_REASONING_QUES',
                                 rank=1,
                                 button='Explain',
                                 patient=self.patient,
