@@ -313,7 +313,7 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
         self.instance_name = self.settings.INSTANCE_NAME
         self.token = self.get_fhir_api_token()
 
-        # Check if a paitent has an elevated PHQ-9
+        # Check if a patient has an elevated PHQ-9
         if self.in_denominator():
 
             if (self.field_changes.get('model_name') == 'appointment' and

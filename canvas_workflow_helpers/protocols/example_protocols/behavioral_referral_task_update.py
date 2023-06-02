@@ -1,44 +1,38 @@
 import requests
-from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import ClinicalQualityMeasure, ProtocolResult
 from canvas_workflow_kit.constants import CHANGE_TYPE
 
 
 class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
-    """
-    This protocol updates the label and team for a task created from a behvaioral health referral.
-    """
 
     class Meta:
-        title = "Behvaioral Referral Task Update"
-
+        title = "Behavioral Referral Task Update"
         version = "2023-v01"
-
-        description = "This protocol updates the label and team for a task created from a behvaioral health referral. "
-
+        description = "This protocol updates the label and team for a task created from a behavioral health referral. "
         information = "https://link_to_protocol_information"
-
-        identifiers = ["BehvaioralReferralTaskUpdate"]
-
-        types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
+        types = ["Task"]
         compute_on_change_types = [CHANGE_TYPE.TASK]
-
         authors = ["Canvas Example Medical Association (CEMA)"]
-
         notification_only = True
 
     token = None
     task_id = None
 
-    behavioral_group_fhir_id = "Group/895037a1-98ea-432b-a42b-5727a40ba2ca"
+    # TODO: These are hard coded variables that can be updated based on your needs
+
+    # The group ID you can retreive from a FHIR Group Search call
+    behavioral_group_fhir_id = "Group/e3fabb40-1ccc-4bb4-9e64-e813f27bf2e2"
+
+    # This is the name of the Team/Group you want to use when re-assigning a task
     behavioral_group_name = "Behavioral Health Coordinators"
+
+    # This is the label you want to add to the task we are updating
     internal_referral_label = "Internal Referral"
+
+    # This is the exact title of the Task we are trying to find and update
     referral_task_title = "Refer patient to Psychiatry (TBD)"
+
+    ##################### HELPER FUNCTIONS ##################################
 
     def get_fhir_api_token(self):
         """Given the Client ID and Client Secret for authentication to FHIR,
@@ -55,14 +49,18 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
             data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}",
         )
 
+        if token_response.status_code != 200:
+            raise Exception('Unable to get a valid FHIR bearer token')
+
         return token_response.json().get("access_token")
 
     def get_fhir_task(self):
         """Given a Task ID, request a FHIR Task Resource"""
+
         if not self.token or not self.task_id:
             return None
 
-        bundle = requests.get(
+        response = requests.get(
             (
                 f"https://fhir-{self.settings.INSTANCE_NAME}.canvasmedical.com/"
                 f"Task?identifier={self.task_id}"
@@ -71,9 +69,12 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
                 "Authorization": f"Bearer {self.token}",
                 "accept": "application/json",
             },
-        ).json()
+        )
 
-        resources = bundle.get("entry", [])
+        if response.status_code != 200:
+            raise Exception('Failed to get FHIR Task')
+
+        resources = response.json().get("entry", [])
         if len(resources) == 0:
             return None
 
@@ -81,10 +82,11 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
 
     def update_fhir_task(self, task):
         """Given a Task ID and Task Resource perform a FHIR Task Update"""
+
         if not self.token or not self.task_id:
             return None
 
-        return requests.put(
+        response = requests.put(
             (
                 f"https://fhir-{self.settings.INSTANCE_NAME}.canvasmedical.com/"
                 f"Task/{self.task_id}"
@@ -97,8 +99,13 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
             },
         )
 
+        if response.status_code != 200:
+            raise Exception(f"Failed to mark Task as completed with {response.status_code} and payload {payload}")
+
     def edit_task(self, task):
-        # update behavioral team to owner
+        """Given a Task update the payload to supply a Group extension and label"""
+
+        # Add an extension for Group assignee in the task payload
         new_extension = {
             "url": "http://schemas.canvasmedical.com/fhir/extensions/task-group",
             "valueReference": {
@@ -108,7 +115,7 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         }
         extension = [*task.get("extension", []), new_extension]
 
-        # add label
+        # add label to the task payload
         new_input = {
             "type": {"text": "label"},
             "valueString": self.internal_referral_label,
@@ -118,18 +125,27 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         new_task = task | {"extension": extension, "input": input}
         return {k: v for k, v in new_task.items() if k != "note"}
 
-    def is_a_referral_task(self, task_id):
-        """Returns true if the task has the title given to Behavioral Referral tasks"""
+    def is_a_referral_task(self):
+        """Returns true if the task has the title we are targetting """
+
         return (
             len(
                 self.patient.tasks.filter(
-                    externallyExposableId=task_id, title=self.referral_task_title
+                    externallyExposableId=self.task_id, title=self.referral_task_title
                 )
             )
             == 1
         )
 
+    ##################### END HELPER FUNCTIONS ##################################
+
     def compute_results(self):
+        """ This is the main function that will check if the task that triggered this protocol
+        is the one that we are hoping to update. If it is, we fetch the task payload from FHIR
+        and update the assignee and label
+        """
+
+        # First get a FHIR API Token
         if not (token := self.get_fhir_api_token()):
             return result
         self.token = token
@@ -137,12 +153,11 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         result = ProtocolResult()
 
         field_changes = self.field_changes or {}
-        task_id = str(field_changes.get("external_id", ""))
+        self.task_id = str(field_changes.get("external_id", ""))
         created = field_changes.get("created") == True
-        if not created or not task_id or not self.is_a_referral_task(task_id):
+        if not created or not self.task_id or not self.is_a_referral_task():
             return result
 
-        self.task_id = task_id
         if not (task := self.get_fhir_task()):
             return result
 
