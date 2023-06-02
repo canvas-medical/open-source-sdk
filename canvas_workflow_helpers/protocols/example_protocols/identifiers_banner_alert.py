@@ -2,10 +2,8 @@ from canvas_workflow_kit.protocol import (
     ClinicalQualityMeasure,
     ProtocolResult,
     STATUS_DUE,
-    STATUS_SATISFIED
 )
 from canvas_workflow_kit.constants import CHANGE_TYPE
-from canvas_workflow_kit.recommendation import Recommendation
 from canvas_workflow_kit.intervention import BannerAlertIntervention
 
 class ExternalIdentifierBanner(ClinicalQualityMeasure):
