@@ -2,6 +2,7 @@ import arrow
 import requests
 import json
 
+from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (
     STATUS_DUE,
@@ -12,15 +13,18 @@ from canvas_workflow_kit.protocol import (
 from canvas_workflow_kit.recommendation import FollowUpRecommendation, ReferRecommendation
 from canvas_workflow_kit.value_set.value_set import ValueSet
 
+class Anxiety(ValueSet):
+    VALUE_SET_NAME = "Anxiety disorder, unspecified"
+    ICD10CM = {'F419'}
 
 class QuestionnairePhq9(ValueSet):
     VALUE_SET_NAME = "PHQ-9 Questionnaire"
     LOINC = {"44249-1"}
 
-
 TELEHEALTH_NOTE_TYPE_CODE = '448337001'
-CARE_COORDINATION_GROUP_ID = "e3fabb40-1ccc-4bb4-9e64-e813f27bf2e2"
+CARE_NAVIGATION_GROUP_ID = "1df2aa9a-c816-4419-942f-c13ef4a54b0e"
 CANVAS_BOT_ID = "5eede137ecfe4124b8b773040e33be14"
+
 APPOINTMENT_CANCELLED_STATUSES = [
     "cancelled",
     "noshowed",
@@ -28,20 +32,21 @@ APPOINTMENT_CANCELLED_STATUSES = [
     "noshow"
 ]
 
-class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
-    class Meta:
-        title = "Follow Up: Elevated PHQ-9"
-        version = "2023-v01"
-        description = "This protocol recommends a follow-up appointment for patients with a PHQ9 score >= 10"
-        information = "https://link_to_protocol_information"
-        types = ["FollowUp"]
-        compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.APPOINTMENT]
+class FollowUpAnxiety(ClinicalQualityMeasure):
 
-        score = None
-        interview_time = None
+    class Meta:
+        title = "Follow Up: Anxiety"
+        version = "2023-v01"
+        description = "This protocol recommends a follow-up appointment for patients with anxiety along witha Task to schedule the follow up"
+
+        information = "https://link_to_protocol_information"
+        types = [""]
+        compute_on_change_types = [CHANGE_TYPE.CONDITION, CHANGE_TYPE.APPOINTMENT]
+        authors = ["Canvas Example Medical Association (CEMA)"]
 
         notification_only = True # If True the protocol will no recompute on upload
 
+        condition_date = None
 
     def get_fhir_api_token(self):
         """ Given the Client ID and Client Secret for authentication to FHIR,
@@ -84,12 +89,12 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
                 {
                   "url": "http://schemas.canvasmedical.com/fhir/extensions/task-group",
                   "valueReference": {
-                    "reference": f"Group/{CARE_COORDINATION_GROUP_ID}"
+                    "reference": f"Group/{CARE_NAVIGATION_GROUP_ID}"
                   }
                 }
             ],
             "status": "requested",
-            "description": "Schedule PHQ-9 follow up for patient",
+            "description": "Schedule anxiety follow up",
             "for": {
                 "reference": f"Patient/{self.patient.patient_key}"
             },
@@ -138,7 +143,7 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
             raise Exception('Failed to get FHIR Task')
 
         resources = response.json().get("entry", [])
-        if not len(resources):
+        if len(resources) == 0:
             return None
 
         return resources[0].get("resource")
@@ -164,9 +169,10 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
         if response.status_code != 200:
             raise Exception(f"Failed to mark Task as completed with {response.status_code} and payload {payload}")
 
+
     def get_follow_up_task(self):
         return self.patient.tasks.filter(
-            status='OPEN', title="Schedule PHQ-9 follow up for patient")
+            status='OPEN', title="Schedule anxiety follow up")
 
     def close_task(self):
         open_tasks = self.get_follow_up_task()
@@ -178,9 +184,10 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
 
     def get_fhir_appointments(self):
         """ Given a Task ID we can perform a FHIR Task Search Request"""
+        date_string = self.condition_date.format('YYYY-MM-DD')
         response = requests.get(
             (f"https://fhir-{self.instance_name}.canvasmedical.com/"
-             f"Appointment?date=ge{self.interview_time[:10]}&patient=Patient/{self.patient.patient_key}"),
+             f"Appointment?date=ge{date_string}&patient=Patient/{self.patient.patient_key}"),
             headers={
                 'Authorization': f'Bearer {self.get_fhir_api_token()}',
                 'accept': 'application/json'
@@ -194,29 +201,20 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
 
     def in_denominator(self):
         """
-        Patients with most recent PHQ9 score >= 10
-
+        Patients diagnosed with anxiety
         """
-        phq9_ques = self.patient.interviews.find(QuestionnairePhq9).last()
-        if not phq9_ques:
-            return False
+        anxiety_condition = self.patient.conditions.find(Anxiety).filter(clinicalStatus='active')
 
-        score = next(
-            (
-                result.get("score")
-                for result in phq9_ques.get("results", [])
-                if result.get("score") and result.get("score") >= 10
-            ),
-            None,
-        )
-        self.score = score
-        self.interview_time = phq9_ques['noteTimestamp']
-        return bool(score)
+        if len(anxiety_condition):
+            self.condition_date = arrow.get(anxiety_condition[-1]['created'])
+            return True
+
+        return False
 
     def in_numerator(self):
         # Patients that have a follow-up appointment scheduled in the future
         telehealth_appts = self.patient.upcoming_appointments.filter(
-            startTime__gt=self.interview_time, noteType__code=TELEHEALTH_NOTE_TYPE_CODE
+            startTime__gt=self.condition_date, noteType__code=TELEHEALTH_NOTE_TYPE_CODE
         )
 
         if any(
@@ -227,7 +225,7 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
             return True
 
         # if there are no upcoming appointments, we need to make sure they dont have a completed
-        # appointment after the PHQ-9 was filled out
+        # appointment after diagnosis was recorded
         appointments = self.get_fhir_appointments()
 
         for apt in appointments.get('entry', []):
@@ -235,10 +233,15 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
             start_time = arrow.get(apt['resource']['start'])
             status = apt['resource']['status']
             if (apt_code == TELEHEALTH_NOTE_TYPE_CODE and
-                start_time > arrow.get(self.interview_time) and
+                start_time > self.condition_date and
                 status not in APPOINTMENT_CANCELLED_STATUSES):
                 return True
 
+    def check_if_field_changed(self, model_name, field_name):
+        if self.field_changes.get("model_name") != model_name:
+            return False
+
+        return field_name in self.field_changes.get("fields", {})
 
     def compute_results(self):
         """ """
@@ -247,12 +250,8 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
         self.instance_name = self.settings.INSTANCE_NAME
         self.token = self.get_fhir_api_token()
 
-        # Check if a patient has an elevated PHQ-9
+        # Check if a patient has anxiety
         if self.in_denominator():
-
-            if (self.field_changes.get('model_name') == 'appointment' and
-                not self.field_changes.get('created')):
-                return result
 
             if self.in_numerator():
                 result.status = STATUS_SATISFIED
@@ -263,7 +262,7 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
                 result.due_in = -1
                 result.status = STATUS_DUE
 
-                narrative = f"{self.patient.first_name} has completed a PHQ-9 with an elevated score"
+                narrative = f"{self.patient.first_name} has been diagnosed with Anxiety"
                 result.add_narrative(narrative)
 
                 follow_up_recommendation = FollowUpRecommendation(
@@ -275,15 +274,19 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
                     narrative=narrative,
                     context={
                         "requested_date": arrow.now().shift(days=7).format("YYYY-MM-DD"),
-                        "internal_comment": "Reassess PHQ-9",
+                        "internal_comment": "Reassess anxiety",
                         "requested_note_type": TELEHEALTH_NOTE_TYPE_CODE,
-                        "reason_for_visit": "Follow Up Visit"
                     },
                 )
                 result.add_recommendation(follow_up_recommendation)
 
-                if not self.get_follow_up_task():
+                if (self.check_if_field_changed(model_name='condition', field_name='committer_id') and
+                    not self.get_follow_up_task()):
                     self.create_fhir_task()
+
+        # if anxiety command was EIE make sure any task is closed
+        elif self.check_if_field_changed(model_name='condition', field_name='entered_in_error_id'):
+            self.close_task()
 
 
         return result
