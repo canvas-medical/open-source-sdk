@@ -38,7 +38,7 @@ class MessageNotification(ClinicalQualityMeasure):
         return token_response.json().get('access_token')
 
     def get_fhir_communication(self, message_id):
-        """ Given a Task ID we can perform a FHIR Task Search Request"""
+        """ Given a Communication ID we can perform a FHIR Communication Search Request"""
         request = (f"https://fhir-{self.instance_name}.canvasmedical.com/"
              f"Communication?_id={message_id}")
         response = requests.get(
@@ -51,7 +51,7 @@ class MessageNotification(ClinicalQualityMeasure):
         if response.status_code != 200:
             raise Exception(f"Failed to retrieve FHIR Communicaton with {request}")
 
-        return response.json()['entry'][0]
+        return response.json()['entry'][0]['resource']
 
     def compute_results(self):
         result = ProtocolResult()
@@ -66,11 +66,11 @@ class MessageNotification(ClinicalQualityMeasure):
                 message = self.patient.messages.filter(id=canvas_id[1]).records
                 if message:
                     message_id = message[-1]['externallyExposableId']
-                    
-                    # TODO change the url for your needs
-                    send_notification(
-                        'https://webhook.site/0a8f7cb1-fcc5-421c-8a99-9c87533cf678',
-                        json.dumps(self.get_fhir_communication(message_id)),
-                        headers={'Content-Type': 'application/json'})
+                    fhir_record = self.get_fhir_communication(message_id)
+                    if fhir_record['sender']['reference'].startswith("Practitioner"):
+                        send_notification(
+                            'https://webhook.site/0a8f7cb1-fcc5-421c-8a99-9c87533cf678',
+                            json.dumps(self.get_fhir_communication(message_id)),
+                            headers={'Content-Type': 'application/json'})
 
         return result
