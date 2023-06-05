@@ -1,6 +1,6 @@
 import json
+import requests
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
@@ -9,70 +9,64 @@ from canvas_workflow_kit.utils import send_notification
 
 
 class AppointmentNotification(ClinicalQualityMeasure):
-    """
-    Protocol that listens for appointment create / update and sends a notification.
-    """
-
     class Meta:
 
         title = 'Appointment Notification'
-
-        version = 'v1.0.0'
-
+        version = 'v1.0.8'
         description = 'Listens for appointment create / update and sends a notification.'
-
-        information = 'https://canvasmedical.com/'
-
-        identifiers = ['AppointmentNotification']
-
         types = ['Notification']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.APPOINTMENT]
-
-        authors = ['Canvas Medical']
-
-        references = ['Canvas Medical']
-
-        funding_source = ''
-
         notification_only = True
 
-    def appointment_note_has_a_previously_booked_appointment(
-            self, appointment_note_id):
-        if self.patient.upcoming_appointment_notes:
-            appointment_note = self.get_record_by_id(
-                self.patient.upcoming_appointment_notes, appointment_note_id)
-            state_history = appointment_note.get('stateHistory', [])
-            if len(state_history) >= 2:
-                previous_states = [s['state'] for s in state_history][:-1]
-                return 'BKD' in previous_states
-        return False
+    def get_fhir_api_token(self):
+        """ Given the Client ID and Client Secret for authentication to FHIR,
+        return a bearer token """
 
-    def get_appointment_from_note_id(self, note_id):
-        if self.patient.upcoming_appointment_notes:
-            appointment_note = self.get_record_by_id(
-                self.patient.upcoming_appointment_notes, note_id)
-            appointment_id = appointment_note.get('currentAppointmentId')
-            return self.get_record_by_id(self.patient.upcoming_appointments,
-                                         appointment_id)
-        return None
+        grant_type = "client_credentials"
+        client_id = self.settings.CLIENT_ID
+        client_secret = self.settings.CLIENT_SECRET
+
+        token_response = requests.request(
+            "POST",
+            f'https://{self.instance_name}.canvasmedical.com/auth/token/',
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}"
+        )
+
+        if token_response.status_code != 200:
+            raise Exception('Unable to get a valid FHIR bearer token')
+
+        return token_response.json().get('access_token')
+
+    def get_fhir_appointment(self, appointment_id):
+        """ Given a Task ID we can perform a FHIR Task Search Request"""
+        response = requests.get(
+            (f"https://fhir-{self.instance_name}.canvasmedical.com/"
+             f"Appointment/{appointment_id}"),
+            headers={
+                'Authorization': f'Bearer {self.get_fhir_api_token()}',
+                'accept': 'application/json'
+            }
+        )
+
+        if response.status_code != 200:
+            raise Exception("Failed to search Appointments")
+
+        return response.json()
+
+    def get_rescheduled_appointment_id(
+            self, appointment):
+        for info in appointment.get('supportingInformation', {}):
+            if info.get("display") == 'Previously Rescheduled Appointment':
+                return info.get("reference").split("/")[1]
+
+        return False
 
     def get_new_field_value(self, field_name):
         change_context_fields = self.field_changes.get('fields', {})
         if field_name not in change_context_fields:
             return None
         return change_context_fields[field_name][1]
-
-    def get_record_by_id(self, recordset, id):
-        if recordset is not None:
-            recordset_filter = recordset.filter(id=id)
-            if recordset_filter:
-                return json.loads(json.dumps(recordset_filter[0], default=str))
-        return {}
 
     def get_appointment_by_note_state_event(self, _id):
         for apt in self.patient.appointments:
@@ -81,35 +75,18 @@ class AppointmentNotification(ClinicalQualityMeasure):
                 return json.loads(json.dumps(apt, default=str))
         return {}
 
-    @property
-    def patient_external_id(self):
-        external_identifiers = self.patient.patient.get('externalIdentifiers', [])
-        if len(external_identifiers):
-            return external_identifiers[0]['value']
-        return ''
-
-    @property
-    def base_payload(self):
-        return {
-            'canvas_patient_key': self.patient.patient['key'],
-            'external_patient_id': self.patient_external_id,
-            'field_chagnes': self.field_changes
-        }
-
-    # REPLACE this url with your server url which should receive these notifications
-    notification_url = 'https://webhook.site/a018a2b8-ab4a-4692-8e78-503cb3f2cb9c'
-    headers = {'Content-Type': 'application/json'}
-
     def compute_results(self):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        change_context = self.field_changes
-        payload = self.base_payload
-        changed_model = change_context.get('model_name', '')
+        payload = {
+            'canvas_patient_key': self.patient.patient['key'],
+        }
+        changed_model = self.field_changes.get('model_name', '')
 
         if changed_model == 'notestatechangeevent':
             state = self.get_new_field_value('state')
+
             state_map = {
                 'CLD': 'cancelled',
                 'NSW': 'no_show',
@@ -122,7 +99,6 @@ class AppointmentNotification(ClinicalQualityMeasure):
                 return result
 
             appointment = self.get_appointment_by_note_state_event(self.field_changes['canvas_id'])
-
             payload = {
                 **payload,
                 'appointment_external_id': appointment.get('externallyExposableId'),
@@ -130,30 +106,35 @@ class AppointmentNotification(ClinicalQualityMeasure):
             }
 
         elif changed_model == 'appointment':
-            appointment_start_time = self.get_new_field_value('start_time')
+            self.instance_name = self.settings.INSTANCE_NAME
+            self.token = self.get_fhir_api_token()
+
+            appointment_id = self.field_changes.get('external_id')
+            appointment = self.get_fhir_appointment(appointment_id)
+
+            rescheduled = self.get_rescheduled_appointment_id(appointment)
+            created = self.field_changes.get('created')
+
             payload = {
                 **payload,
-                'appointment_external_id': change_context.get('external_id'),
-                'start_time': appointment_start_time
+                'appointment_external_id': self.field_changes.get('external_id'),
+                'start_time': appointment.get("start"),
+                'end_time': appointment.get("end")
             }
 
-            created = change_context.get('created')
-            if created:
-                appointment_note_id = self.get_new_field_value('note_id')
-                rescheduled = self.appointment_note_has_a_previously_booked_appointment(
-                    appointment_note_id)
+            if created and not rescheduled:
+                payload['created'] = True
+            elif created and rescheduled:
+                payload['rescheduled'] = True
             else:
-                rescheduled = appointment_start_time is not None
-
-            if rescheduled:
-                payload = {**payload, 'rescheduled': True}
-            elif created:
-                payload = {**payload, 'created': True}
-
+                return result
         else:
             return result
 
-        send_notification(self.notification_url, json.dumps(payload),
-                          self.headers)
+        # REPLACE this url with your server url which should receive these notifications
+        send_notification(
+            'https://webhook.site/0a8f7cb1-fcc5-421c-8a99-9c87533cf678',
+            json.dumps(payload),
+            headers={'Content-Type': 'application/json'})
 
         return result
