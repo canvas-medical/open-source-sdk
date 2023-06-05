@@ -2,7 +2,6 @@ import arrow
 import requests
 import json
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (
     STATUS_DUE,
@@ -20,7 +19,8 @@ class QuestionnairePhq9(ValueSet):
 
 
 TELEHEALTH_NOTE_TYPE_CODE = '448337001'
-
+CARE_COORDINATION_GROUP_ID = "e3fabb40-1ccc-4bb4-9e64-e813f27bf2e2"
+CANVAS_BOT_ID = "5eede137ecfe4124b8b773040e33be14"
 APPOINTMENT_CANCELLED_STATUSES = [
     "cancelled",
     "noshowed",
@@ -29,31 +29,13 @@ APPOINTMENT_CANCELLED_STATUSES = [
 ]
 
 class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
-    """
-    This protocol recommends a follow-up behavioral appointment for patients with a PHQ9 score >= 10
-    It also creates a Task for someone to schedule the follow up
-    """
-
     class Meta:
         title = "Follow Up: Elevated PHQ-9"
-
         version = "2023-v01"
-
         description = "This protocol recommends a follow-up appointment for patients with a PHQ9 score >= 10"
-
         information = "https://link_to_protocol_information"
-
-        identifiers = ["FollowUpElevatedPHQ9"]
-
-        types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
+        types = ["FollowUp"]
         compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.APPOINTMENT]
-
-        authors = ["Canvas Example Medical Association (CEMA)"]
 
         score = None
         interview_time = None
@@ -81,53 +63,6 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
 
         return token_response.json().get('access_token')
 
-    def get_care_coordination_group(self):
-        return "4dfcb0f8-3594-4195-8870-32464756ae47"
-
-        # Below is the request to make if you want to programatically fetch the group
-        # but most of the time these values are stable per instance and we want to reduce calls
-
-        # response = requests.request(
-        #     "GET",
-        #     f"https://fhir-{self.instance_name}.canvasmedical.com/Group",
-        #     headers={
-        #         'Authorization': f'Bearer {self.token}',
-        #         'accept': 'application/json'
-        #     },
-        # )
-
-        # if response.status_code != 200:
-        #     raise Exception("Unable to search FHIR Group")
-
-        # for entry in response.json()['entry']:
-        #     resource = entry['resource']
-        #     if resource['name'] == 'Care Coordination':
-        #         return resource['id']
-
-    def get_canvas_bot(self):
-        return "5eede137ecfe4124b8b773040e33be14"
-
-        # Below is the request to make if you want to programatically fetch the group
-        # but most of the time these values are stable per instance and we want to reduce calls
-
-        # response = requests.request(
-        #     "GET",
-        #     (f"https://fhir-{self.instance_name}.canvasmedical.com/"
-        #     "Practitioner?include-non-scheduleable-practitioners=true"),
-        #     headers={
-        #         'Authorization': f'Bearer {self.token}',
-        #         'accept': 'application/json'
-        #     },
-        # )
-
-        # if response.status_code != 200:
-        #     raise Exception("Unable to search FHIR Practitioner")
-
-        # for entry in response.json()['entry']:
-        #     resource = entry['resource']
-        #     if resource['name'][0]['text'] == 'Canvas Bot':
-        #         return resource['id']
-
     def get_care_team_lead(self):
         key = None
         care_teams = self.patient.patient.get('careTeamMemberships', [])
@@ -149,7 +84,7 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
                 {
                   "url": "http://schemas.canvasmedical.com/fhir/extensions/task-group",
                   "valueReference": {
-                    "reference": f"Group/{self.get_care_coordination_group()}"
+                    "reference": f"Group/{CARE_COORDINATION_GROUP_ID}"
                   }
                 }
             ],
@@ -159,7 +94,7 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
                 "reference": f"Patient/{self.patient.patient_key}"
             },
             "requester": {
-                "reference": f"Practitioner/{self.get_canvas_bot()}"
+                "reference": f"Practitioner/{CANVAS_BOT_ID}"
             },
             **self.get_care_team_lead(),
             "input": [
@@ -203,7 +138,7 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
             raise Exception('Failed to get FHIR Task')
 
         resources = response.json().get("entry", [])
-        if len(resources) == 0:
+        if not len(resources):
             return None
 
         return resources[0].get("resource")
@@ -228,7 +163,6 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
 
         if response.status_code != 200:
             raise Exception(f"Failed to mark Task as completed with {response.status_code} and payload {payload}")
-
 
     def get_follow_up_task(self):
         return self.patient.tasks.filter(

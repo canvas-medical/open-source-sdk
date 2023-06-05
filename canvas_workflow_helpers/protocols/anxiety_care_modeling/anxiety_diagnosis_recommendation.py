@@ -23,17 +23,11 @@ class AnxietyDiagnosis(ClinicalQualityMeasure):
 
     class Meta:
         title = "Diagnose: Anxiety"
-
         version = "2023-v01"
-
         description = "This protocol recommends a diagnosis of anxiety for patients with a GAD7 score > 10"
-
         information = "https://link_to_protocol_information"
-
         types = [""]
-
         compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.CONDITION]
-
         authors = ["Canvas Example Medical Association (CEMA)"]
 
         score = None
