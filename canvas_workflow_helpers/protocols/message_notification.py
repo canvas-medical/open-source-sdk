@@ -5,17 +5,21 @@ from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
                                           ProtocolResult)
 from canvas_workflow_kit.utils import send_notification
-import requests
 
-
-class MessageNotification(ClinicalQualityMeasure):
+class MessagesListener(ClinicalQualityMeasure):
     class Meta:
+
         title = 'Message Notification'
         version = 'v0.0.1'
-        description = 'Listens for message submission and sends a notification.'
+        description = 'Listens for message from both staff and patients and sends a notification.'
         types = ['Notification']
         compute_on_change_types = [CHANGE_TYPE.MESSAGE]
+
         notification_only = True
+
+    # REPLACE this url with your server url which should receive these notifications
+    notification_url = 'https://webhook.site/2a5d6d49-f2d3-4cd9-a9e5-273992d81913'
+    headers = {'Content-Type': 'application/json'}
 
     def get_fhir_api_token(self):
         """ Given the Client ID and Client Secret for authentication to FHIR,
@@ -57,20 +61,35 @@ class MessageNotification(ClinicalQualityMeasure):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
 
-        if self.field_changes['model_name'] == 'messagetransmission':
-            self.instance_name = self.settings.INSTANCE_NAME
-            self.token = self.get_fhir_api_token()
+        # only care about when the record is created for the first time to reduce noise
+        if self.field_changes.get("created"):
 
-            canvas_id = self.field_changes.get('fields', {}).get('message_id', None)
-            if canvas_id:
-                message = self.patient.messages.filter(id=canvas_id[1]).records
-                if message:
-                    message_id = message[-1]['externallyExposableId']
-                    fhir_record = self.get_fhir_communication(message_id)
-                    if fhir_record['sender']['reference'].startswith("Practitioner"):
-                        send_notification(
-                            'https://webhook.site/0a8f7cb1-fcc5-421c-8a99-9c87533cf678',
-                            json.dumps(self.get_fhir_communication(message_id)),
-                            headers={'Content-Type': 'application/json'})
+            model_name = self.field_changes.get("model_name")
+
+            # Message tranmissions only happen when Staff is sending to a patient
+            if model_name == 'messagetransmission':
+                message_id = (self.field_changes.get('fields')).get('message_id')
+                canvas_id = message_id[1]
+                message = self.patient.messages.filter(id=canvas_id)[0]
+                self.base_payload = {
+                    'canvas_patient_key': self.patient.patient['key'],
+                    'message_info': message,
+                    'fhir_payload': self.get_fhir_communication(message['externallyExposableId'])
+
+                }
+                send_notification(self.notification_url, json.dumps(self.base_payload), self.headers)
+
+            # We need to confirm that we are only getting messages patient send to staff
+            elif model_name == 'message':
+                canvas_id = self.field_changes.get("canvas_id")
+                message = self.patient.messages.filter(id=canvas_id)[0]
+                if message['sender']['type'] == 'Patient':
+                    self.base_payload = {
+                        'canvas_patient_key': self.patient.patient['key'],
+                        'message_info': message,
+                        'fhir_payload': self.get_fhir_communication(message['externallyExposableId'])
+
+                    }
+                    send_notification(self.notification_url, json.dumps(self.base_payload), self.headers)
 
         return result
