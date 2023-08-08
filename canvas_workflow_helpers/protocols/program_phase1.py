@@ -11,19 +11,19 @@ from canvas_workflow_kit.protocol import (
     ProtocolResult
 )
 
-class EMOProgramStage3(ClinicalQualityMeasure):
+class ProgramStage1(ClinicalQualityMeasure):
 
     class Meta:
-        title = '[EMO] 3. Review Complete'
+        title = 'Stage 1. Pending Review'
         version = '1.0.0'
         description = (
-            'Protocol that displays the EMO (Expert Medical Option) program phase 3 for a patient '
+            'Protocol that displays the program phase 1 for a patient '
             'based on their identifiers')
         types = ['']
         compute_on_change_types = [CHANGE_TYPE.PATIENT]
         notification_only = True
 
-    def find_emo_program_status(self, stage: str) -> bool:
+    def find_program_status(self, stage: str) -> bool:
         for identifier in self.patient.patient['externalIdentifiers']:
             if identifier["value"] == stage:
                 return True
@@ -33,7 +33,7 @@ class EMOProgramStage3(ClinicalQualityMeasure):
 
         result = ProtocolResult()
 
-        if self.find_emo_program_status("EMOstage3"):
+        if self.find_program_status("stage1"):
             result.status = STATUS_DUE
 
         return result
