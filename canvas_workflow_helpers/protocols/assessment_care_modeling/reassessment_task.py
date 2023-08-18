@@ -1,7 +1,5 @@
-import json
 import arrow
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
@@ -28,24 +26,13 @@ class ReassessmentQuestionnaireTaskCreator(ClinicalQualityMeasure):
     # You can normally get this ID from our FHIR Group Search endpoint
     TEAM_IDENTIFIER = '5425152c-d390-4498-9948-fe1eef711fbd'
 
-    def get_record(self, recordset, identifiers):
-        if recordset is not None:
-            recordset_filter = recordset.filter(**identifiers)
-            if recordset_filter:
-                return json.loads(json.dumps(recordset_filter[0], default=str))
-        return {}
-
     def get_newly_created_interview(self):
-        change_context = self.field_changes
-        if not change_context:
-            return False
-
-        changed_model = change_context.get('model_name')
-        created = change_context.get('created')
+        changed_model = self.field_changes.get('model_name')
+        created = self.field_changes.get('created')
         # we only care about interviews that have been created
         if changed_model != 'interview' or not created:
             return False
-        return change_context['canvas_id']
+        return self.field_changes['canvas_id']
 
     def compute_results(self):
         result = ProtocolResult()
