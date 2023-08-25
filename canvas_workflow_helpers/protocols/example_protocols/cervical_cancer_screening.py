@@ -173,7 +173,7 @@ class CervicalCancerScreening(ClinicalQualityMeasure):
                 result.add_recommendation(hpv_recommendation)
 
                 refer_recommendation = ReferRecommendation(
-                    key='RECOMMEND_REFER_COLONOSCOPY',
+                    key='RECOMMEND_REFER_OBGYN',
                     rank=3,
                     button='Refer',
                     patient=self.patient,
