@@ -103,7 +103,7 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
                   "type": {
                     "text": "label"
                   },
-                  "valueString": "RFV Missing"
+                  "valueString": "Urgent"
                 }
             ],
             "restriction": {
