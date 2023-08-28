@@ -32,7 +32,7 @@ class ScheduleInitialOfficeVisit(ClinicalQualityMeasure):
 
     class Meta:
         title = "Schedule Initial Office Visit"
-        version = "2023-v01"
+        version = '2023-08-28'
         description = "This protocol recommends a follow-up appointment for patients based on questionnaire responses"
 
         information = "https://link_to_protocol_information"
