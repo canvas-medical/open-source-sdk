@@ -31,7 +31,7 @@ class QuestionnaireIntakeChecklist(ValueSet):
 class ScheduleInitialOfficeVisit(ClinicalQualityMeasure):
 
     class Meta:
-        title = "Schedule Initial Office Visit"
+        title = "Schedule Initial Visit"
         version = '2023-08-28'
         description = "This protocol recommends a follow-up appointment for patients based on questionnaire responses"
 
@@ -40,7 +40,7 @@ class ScheduleInitialOfficeVisit(ClinicalQualityMeasure):
         compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.APPOINTMENT]
         authors = ["Canvas Example Medical Association (CEMA)"]
 
-        notification_only = True # If True the protocol will no recompute on upload
+        notification_only = False # If True the protocol will no recompute on upload
 
         interview_date = None
 
@@ -77,7 +77,7 @@ class ScheduleInitialOfficeVisit(ClinicalQualityMeasure):
                 }
             ],
             "status": "requested",
-            "description": "Schedule Office Visit",
+            "description": "Schedule Initial Visit",
             "for": {
                 "reference": f"Patient/{self.patient.patient_key}"
             },
@@ -249,16 +249,13 @@ class ScheduleInitialOfficeVisit(ClinicalQualityMeasure):
                 result.due_in = -1
                 result.status = STATUS_DUE
 
-                narrative = f"Schedule patient for their initial office visit"
-                result.add_narrative(narrative)
-
                 follow_up_recommendation = FollowUpRecommendation(
                     key="RECOMMEND_FOLLOW_UP",
                     rank=1,
                     button="Follow up",
                     patient=self.patient,
-                    title=f"Schedule a One Week Follow Up",
-                    narrative=narrative,
+                    title=f"Schedule patient for their initial visit",
+                    narrative="",
                     context={
                         "requested_date": arrow.now().shift(days=7).format("YYYY-MM-DD"),
                         "requested_note_type": OFFICE_VISIT_NOTE_TYPE_CODE,
