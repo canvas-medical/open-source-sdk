@@ -13,12 +13,8 @@ from canvas_workflow_kit.protocol import (
 from canvas_workflow_kit.recommendation import FollowUpRecommendation, ReferRecommendation
 from canvas_workflow_kit.value_set.value_set import ValueSet
 
-class Anxiety(ValueSet):
-    VALUE_SET_NAME = "Anxiety disorder, unspecified"
-    ICD10CM = {'F419'}
-
-TELEHEALTH_NOTE_TYPE_CODE = '448337001'
-CARE_NAVIGATION_GROUP_ID = "1df2aa9a-c816-4419-942f-c13ef4a54b0e"
+OFFICE_VISIT_NOTE_TYPE_CODE = '308335008'
+CARE_COORDINATION_GROUP_ID = "4dfcb0f8-3594-4195-8870-32464756ae47"
 CANVAS_BOT_ID = "5eede137ecfe4124b8b773040e33be14"
 
 APPOINTMENT_CANCELLED_STATUSES = [
@@ -28,21 +24,25 @@ APPOINTMENT_CANCELLED_STATUSES = [
     "noshow"
 ]
 
-class FollowUpAnxiety(ClinicalQualityMeasure):
+class QuestionnaireIntakeChecklist(ValueSet):
+    VALUE_SET_NAME = "Intake Checklist"
+    INTERNAL = {"999-999"}
+
+class ScheduleInitialOfficeVisit(ClinicalQualityMeasure):
 
     class Meta:
-        title = "Follow Up: Anxiety"
-        version = "2023-v01"
-        description = "This protocol recommends a follow-up appointment for patients with anxiety along witha Task to schedule the follow up"
+        title = "Schedule Initial Visit"
+        version = '2023-08-28'
+        description = "This protocol recommends a follow-up appointment for patients based on questionnaire responses"
 
         information = "https://link_to_protocol_information"
         types = [""]
-        compute_on_change_types = [CHANGE_TYPE.CONDITION, CHANGE_TYPE.APPOINTMENT]
+        compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.APPOINTMENT]
         authors = ["Canvas Example Medical Association (CEMA)"]
 
-        notification_only = True # If True the protocol will no recompute on upload
+        notification_only = False # If True the protocol will no recompute on upload
 
-        condition_date = None
+        interview_date = None
 
     def get_fhir_api_token(self):
         """ Given the Client ID and Client Secret for authentication to FHIR,
@@ -64,19 +64,6 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
 
         return token_response.json().get('access_token')
 
-    def get_care_team_lead(self):
-        key = None
-        care_teams = self.patient.patient.get('careTeamMemberships', [])
-        for care_team in self.patient.patient.get('careTeamMemberships', []):
-            if care_team.get('lead'):
-                key = care_team.get('staff', {}).get('key')
-
-        return {
-            "owner": {
-                "reference": f"Practitioner/{key}"
-            }
-        } if key else {}
-
     def create_fhir_task(self):
         """ Create a Task to schedule Follow UP"""
         payload = json.dumps({
@@ -85,30 +72,29 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
                 {
                   "url": "http://schemas.canvasmedical.com/fhir/extensions/task-group",
                   "valueReference": {
-                    "reference": f"Group/{CARE_NAVIGATION_GROUP_ID}"
+                    "reference": f"Group/{CARE_COORDINATION_GROUP_ID}"
                   }
                 }
             ],
             "status": "requested",
-            "description": "Schedule anxiety follow up",
+            "description": "Schedule Initial Visit",
             "for": {
                 "reference": f"Patient/{self.patient.patient_key}"
             },
             "requester": {
                 "reference": f"Practitioner/{CANVAS_BOT_ID}"
             },
-            **self.get_care_team_lead(),
             "input": [
                 {
                   "type": {
                     "text": "label"
                   },
-                  "valueString": "Urgent"
+                  "valueString": "Routine"
                 }
             ],
             "restriction": {
                 "period": {
-                  "end": f'{arrow.now().shift(days=1).format("YYYY-MM-DD")}T00:00:00+00:00'
+                  "end": f'{arrow.now().shift(days=1).isoformat()}'
                 }
             }
         })
@@ -168,7 +154,7 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
 
     def get_follow_up_task(self):
         return self.patient.tasks.filter(
-            status='OPEN', title="Schedule anxiety follow up")
+            status='OPEN', title="Schedule Office Visit")
 
     def close_task(self):
         open_tasks = self.get_follow_up_task()
@@ -180,7 +166,7 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
 
     def get_fhir_appointments(self):
         """ Given a Task ID we can perform a FHIR Task Search Request"""
-        date_string = self.condition_date.format('YYYY-MM-DD')
+        date_string = self.interview_date.format('YYYY-MM-DD')
         response = requests.get(
             (f"https://fhir-{self.instance_name}.canvasmedical.com/"
              f"Appointment?date=ge{date_string}&patient=Patient/{self.patient.patient_key}"),
@@ -197,25 +183,31 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
 
     def in_denominator(self):
         """
-        Patients diagnosed with anxiety
+        Patients have answered Yes to all the questions on the Intake Checklist Questionnaire
         """
-        anxiety_condition = self.patient.conditions.find(Anxiety).filter(clinicalStatus='active')
+        interviews = self.patient.interviews.find(QuestionnaireIntakeChecklist).filter(status='AC')
 
-        if len(anxiety_condition):
-            self.condition_date = arrow.get(anxiety_condition[-1]['created'])
+        if len(interviews):
+            most_recent = max(interviews, key=lambda x: x['noteTimestamp'])
+
+            # check that all the response's values are `Yes`
+            if not all([r['value'] == 'Yes' for r in most_recent['responses']]):
+                return False
+
+            self.interview_date = arrow.get(most_recent['noteTimestamp'])
             return True
 
         return False
 
     def in_numerator(self):
         # Patients that have a follow-up appointment scheduled in the future
-        telehealth_appts = self.patient.upcoming_appointments.filter(
-            startTime__gt=self.condition_date, noteType__code=TELEHEALTH_NOTE_TYPE_CODE
+        office_apts = self.patient.upcoming_appointments.filter(
+            startTime__gt=self.interview_date, noteType__code=OFFICE_VISIT_NOTE_TYPE_CODE
         )
 
         if any(
             appt
-            for appt in telehealth_appts
+            for appt in office_apts
             if appt.get("status") not in APPOINTMENT_CANCELLED_STATUSES
         ):
             return True
@@ -228,8 +220,8 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
             apt_code = apt['resource']['appointmentType']['coding'][0]['code']
             start_time = arrow.get(apt['resource']['start'])
             status = apt['resource']['status']
-            if (apt_code == TELEHEALTH_NOTE_TYPE_CODE and
-                start_time > self.condition_date and
+            if (apt_code == OFFICE_VISIT_NOTE_TYPE_CODE and
+                start_time > self.interview_date and
                 status not in APPOINTMENT_CANCELLED_STATUSES):
                 return True
 
@@ -246,7 +238,6 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
         self.instance_name = self.settings.INSTANCE_NAME
         self.token = self.get_fhir_api_token()
 
-        # Check if a patient has anxiety
         if self.in_denominator():
 
             if self.in_numerator():
@@ -258,30 +249,26 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
                 result.due_in = -1
                 result.status = STATUS_DUE
 
-                narrative = f"{self.patient.first_name} has been diagnosed with Anxiety"
-                result.add_narrative(narrative)
-
                 follow_up_recommendation = FollowUpRecommendation(
                     key="RECOMMEND_FOLLOW_UP",
                     rank=1,
                     button="Follow up",
                     patient=self.patient,
-                    title=f"Schedule a One Week Follow Up",
-                    narrative=narrative,
+                    title=f"Schedule patient for their initial visit",
+                    narrative="",
                     context={
                         "requested_date": arrow.now().shift(days=7).format("YYYY-MM-DD"),
-                        "internal_comment": "Reassess anxiety",
-                        "requested_note_type": TELEHEALTH_NOTE_TYPE_CODE,
+                        "requested_note_type": OFFICE_VISIT_NOTE_TYPE_CODE,
+                        "reason_for_visit_coding": "INIV30"
                     },
                 )
                 result.add_recommendation(follow_up_recommendation)
 
-                if (self.check_if_field_changed(model_name='condition', field_name='committer_id') and
-                    not self.get_follow_up_task()):
+                if not self.get_follow_up_task():
                     self.create_fhir_task()
 
-        # if anxiety command was EIE make sure any task is closed
-        elif self.check_if_field_changed(model_name='condition', field_name='entered_in_error_id'):
+        # if questionnnaire command was EIE make sure any task is closed
+        elif self.check_if_field_changed(model_name='interview', field_name='entered_in_error_id'):
             self.close_task()
 
 
