@@ -5,6 +5,7 @@ from canvas_workflow_kit.protocol import (
     ClinicalQualityMeasure,
     ProtocolResult,
     STATUS_DUE,
+    STATUS_SATISFIED
 )
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.value_set.value_set import ValueSet
@@ -96,10 +97,13 @@ class ReviewClaimTask(ClinicalQualityMeasure):
                 coverage = coverage['resource']
                 if (
                     coverage['status'] == "active" and
-                    coverage['period'].get("end") and
-                    arrow.get(coverage['period']['end']).date() >= arrow.now().date() and
                     coverage['payor'][0]['display'] == transactor_name
                 ):
+                    # skip over expired ones
+                    if (coverage['period'].get("end") and
+                        arrow.get(coverage['period']['end']).date() < arrow.now().date()):
+                        continue
+
                     # confirm the group number
                     group_number_found = any([_class['type']['coding'][0]['code'] == 'group'
                         and _class['value'] == group_number
@@ -180,12 +184,17 @@ class ReviewClaimTask(ClinicalQualityMeasure):
     def compute_results(self):
         result = ProtocolResult()
 
-        if (self.has_group_number_in_coverage(
+        if self.has_group_number_in_coverage(
             group_number='123456789',
             transactor_name="AL BCBS",
-            transactor_type="commercial")
-            and self.has_diagnosis_with_cpt_code(condition=Obesity, cpt_code='99402')):
+            transactor_type="commercial"):
 
-            self.create_fhir_task()
+                if self.has_diagnosis_with_cpt_code(condition=Obesity, cpt_code='99402'):
+                    result.status = STATUS_DUE
+                    self.create_fhir_task()
+                else:
+                    result.status = STATUS_SATISFIED
+        else:
+            result.add_narrative("No AL BCBS coverage found with group number 123456789")
 
         return result

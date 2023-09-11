@@ -87,10 +87,13 @@ class CPTCoverageBannerAlert(ClinicalQualityMeasure):
                 coverage = coverage['resource']
                 if (
                     coverage['status'] == "active" and
-                    coverage['period'].get("end") and
-                    arrow.get(coverage['period']['end']).date() >= arrow.now().date() and
                     coverage['payor'][0]['display'] == transactor_name
                 ):
+                    # skip over expired ones
+                    if (coverage['period'].get("end") and
+                        arrow.get(coverage['period']['end']).date() < arrow.now().date()):
+                        continue
+
                     # confirm the group number
                     group_number_found = any([_class['type']['coding'][0]['code'] == 'group'
                         and _class['value'] == group_number
