@@ -26,7 +26,7 @@ class ExternalIdentifierBanner(ClinicalQualityMeasure):
                 result.recommendations.append(
                     BannerAlertIntervention(
                         narrative=(f"{external_identifier['system']}: {external_identifier['value']}"),
-                        placement=[AlertPlacement.ALERT_PLACEMENT_PROFILE, AlertPlacement.ALERT_PLACEMENT_CHART],
-                        intent=AlertIntent.ALERT_INTENT_INFO)
+                        placement=['profile', 'chart'],
+                        intent='info')
                     )
         return result
