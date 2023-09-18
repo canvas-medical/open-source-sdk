@@ -3,8 +3,9 @@ from canvas_workflow_kit.protocol import (
     ProtocolResult,
     STATUS_DUE,
 )
-from canvas_workflow_kit.constants import CHANGE_TYPE
+from canvas_workflow_kit.constants import CHANGE_TYPE, AlertPlacement, AlertIntent
 from canvas_workflow_kit.intervention import BannerAlertIntervention
+
 
 class ExternalIdentifierBanner(ClinicalQualityMeasure):
     class Meta:
@@ -25,7 +26,7 @@ class ExternalIdentifierBanner(ClinicalQualityMeasure):
                 result.recommendations.append(
                     BannerAlertIntervention(
                         narrative=(f"{external_identifier['system']}: {external_identifier['value']}"),
-                        placement=['profile'],
-                        intent='info')
+                        placement=[AlertPlacement.ALERT_PLACEMENT_PROFILE, AlertPlacement.ALERT_PLACEMENT_CHART],
+                        intent=AlertIntent.ALERT_INTENT_INFO)
                     )
         return result
