@@ -23,7 +23,7 @@ from canvas_workflow_kit.value_set.v2021.diagnosis import (
     Proteinuria,
 )
 from canvas_workflow_kit.value_set.v2021.medication import (
-    AceInhibitorOrArbIngredient,
+    AceInhibitorOrArbOrArni,
 )
 
 BloodPressureReading = NamedTuple(
@@ -164,7 +164,7 @@ class DiabeticHypertensionWithAlbuminuria(ClinicalQualityMeasure):
 
     def acei_arb_prescription(self) -> bool:
         return bool(
-            self.patient.medications.find(AceInhibitorOrArbIngredient).filter(
+            self.patient.medications.find(AceInhibitorOrArbOrArni).filter(
                 status='active'
             )
         )
