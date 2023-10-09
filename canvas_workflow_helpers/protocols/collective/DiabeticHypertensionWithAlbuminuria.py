@@ -1,4 +1,3 @@
-# TODO WRITE TESTS
 from datetime import datetime
 from typing import List, NamedTuple, Optional
 
@@ -122,7 +121,7 @@ class DiabeticHypertensionWithAlbuminuria(ClinicalQualityMeasure):
             'add from the remaining classes until maxed out, '
             'then consider spironolactone as a fourth option.'
         )
-        version = '1.0.2'
+        version = '1.0.22'
         information = 'https://canvasmedical.com/gallery'
         identifiers = []
         types = []
@@ -268,7 +267,7 @@ class DiabeticHypertensionWithAlbuminuria(ClinicalQualityMeasure):
         if latest_bp := self.latest_blood_pressure_reading():
             return (
                 latest_bp.systolic < 100 and latest_bp.diastolic < 60
-                if self.has_albuminuria()
+                if self.has_albuminuria() and not self.acei_arb_max_dose()
                 else latest_bp.systolic < 130 and latest_bp.diastolic < 80
             )
         else:
