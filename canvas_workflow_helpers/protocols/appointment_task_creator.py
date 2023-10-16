@@ -1,7 +1,6 @@
 import json
 import arrow
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
@@ -11,24 +10,12 @@ from canvas_workflow_kit.internal.integration_messages import create_task_payloa
 
 
 class AppointmentTaskCreator(ClinicalQualityMeasure):
-    """
-    Protocol that listens for appointment creates and generates a task.
-    """
 
     class Meta:
-
         title = 'Appointment Task Creator'
-
         version = 'v1.0.0'
-
         description = 'Listens for appointment creates and generates a task.'
-
         types = ['Task']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.APPOINTMENT]
 
     # This is a hard-coded team identifier that is always responsible calling patients
@@ -93,5 +80,6 @@ class AppointmentTaskCreator(ClinicalQualityMeasure):
             )
 
             self.set_updates([task_payload])
+            result.add_narrative("successfully created task")
 
         return result

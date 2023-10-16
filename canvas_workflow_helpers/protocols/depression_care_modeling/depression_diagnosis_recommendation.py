@@ -1,4 +1,3 @@
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (
     STATUS_DUE,
@@ -23,24 +22,11 @@ class DepressionDiagnosis(ClinicalQualityMeasure):
 
     class Meta:
         title = "Diagnose: Depression"
-
         version = "2023-v01"
-
         description = "This protocol recommends a diagnosis of depression for patients with a PHQ9 score >= 10"
-
-        information = "https://link_to_protocol_information"
-
         identifiers = ["DepressionDiagnosis"]
-
         types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.CONDITION]
-
-        authors = ["Canvas Example Medical Association (CEMA)"]
 
         score = None
         notification_only = True # If True the protocol will no recompute on upload

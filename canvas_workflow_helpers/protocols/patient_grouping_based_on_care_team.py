@@ -1,6 +1,3 @@
-# type: ignores
-
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.internal.integration_messages import (
     ensure_patient_in_group,

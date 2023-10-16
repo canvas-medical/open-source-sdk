@@ -1,6 +1,5 @@
 import math
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.intervention import BannerAlertIntervention
 from canvas_workflow_kit.protocol import STATUS_DUE, ClinicalQualityMeasure, ProtocolResult
@@ -16,27 +15,12 @@ class BannerAlertContacts(ClinicalQualityMeasure):
     class Meta:
 
         title = 'Banner Alert Contacts'
-
         version = 'v1.0.0'
-
         description = 'Reminders about patients over the age of 70'
-
         information = 'https://canvasmedical.com/'
-
         identifiers = ['BannerAlertContacts']
-
         types = ['Alerts']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
         compute_on_change_types = [CHANGE_TYPE.PATIENT]
-
-        authors = ['Canvas Medical']
-
-        references = ['Canvas Medical']
-
-        funding_source = ''
 
     rounded_patient_age = None
 
@@ -48,10 +32,7 @@ class BannerAlertContacts(ClinicalQualityMeasure):
         return display
 
     def in_denominator(self):
-        """
-        Patients over the age of 70.
-
-        """
+        """Patients over the age of 70."""
         rounded_patient_age = math.floor(self.patient.age)
         self.rounded_patient_age = rounded_patient_age
         return rounded_patient_age >= 70

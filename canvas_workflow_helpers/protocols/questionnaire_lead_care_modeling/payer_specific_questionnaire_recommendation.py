@@ -9,6 +9,7 @@ from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ProtocolResult)
 from canvas_workflow_kit.value_set.value_set import ValueSet
 from canvas_workflow_kit.recommendation import InterviewRecommendation
+from canvas_workflow_kit.fhir import FumageHelper
 
 
 class UMCriteria(ValueSet):
@@ -27,54 +28,21 @@ class PayorSpecificQuestionnaireRecommendation(ClinicalQualityMeasure):
 
     dates = []
 
-    def get_fhir_api_token(self):
-        """ Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token """
-
-        grant_type = "client_credentials"
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            "POST",
-            f'https://{self.instance_name}.canvasmedical.com/auth/token/',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}"
-        )
-
-        if token_response.status_code != 200:
-            raise Exception('Unable to get a valid FHIR bearer token')
-
-        return token_response.json().get('access_token')
-
     def get_fhir_appointment(self, apt_id):
         """ Given a Apt ID we can perform a FHIR Appointment Read Request"""
-        response = requests.get(
-            f"https://fhir-{self.instance_name}.canvasmedical.com/Appointment/{apt_id}",
-            headers={
-                'Authorization': f'Bearer {self.token}',
-                'accept': 'application/json'
-            }
-        )
+        response = self.fhir.read("Appointment", apt_id)
 
         if response.status_code != 200:
-            raise Exception('Failed to get FHIR Appointment: ', apt_id)
+            raise Exception(f"Failed to get FHIR Appointment {apt_id}, {response.text}, {response.headers}")
 
         return response.json()
 
     def search_fhir_appointment(self):
         """ Given a Apt ID we can perform a FHIR Appointment Read Request"""
-        response = requests.get(
-            (f"https://fhir-{self.instance_name}.canvasmedical.com/"
-             f"Appointment?patient=Patient/{self.patient.patient_key}"),
-            headers={
-                'Authorization': f'Bearer {self.get_fhir_api_token()}',
-                'accept': 'application/json'
-            }
-        )
+        response = self.fhir("Appointment", {"patient": f"Patient{self.patient.patient_key}"})
 
         if response.status_code != 200:
-            raise Exception("Failed to search Appointments")
+            raise Exception(f"Failed to search Appointments {response.text} {response.headers}")
 
         return response.json()
 
@@ -138,8 +106,8 @@ class PayorSpecificQuestionnaireRecommendation(ClinicalQualityMeasure):
         if self.patient_has_coverage(name="Humana", _type='commercial'):
 
 
-            self.instance_name = self.settings.INSTANCE_NAME
-            self.token = self.get_fhir_api_token()
+            self.fhir = FumageHelper(self.settings)
+            self.fhir.get_fhir_api_token()
 
             # trigger only on a check in action of an appointment
             if changed_model == 'notestatechangeevent' and self.get_new_field_value('state') == 'CVD':

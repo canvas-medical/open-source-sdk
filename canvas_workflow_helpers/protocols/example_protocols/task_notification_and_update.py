@@ -8,6 +8,7 @@ from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
                                           ProtocolResult)
 from canvas_workflow_kit.utils import send_notification
+from canvas_workflow_kit.fhir import FumageHelper
 
 class SyncTask(ClinicalQualityMeasure):
     class Meta:
@@ -40,13 +41,12 @@ class SyncTask(ClinicalQualityMeasure):
 
     def get_fhir_task(self, task_id):
         """ Given a Task ID we can perform a FHIR Task Search Request"""
-        return requests.get(
-            f"https://fhir-{self.INSTANCE_NAME}.canvasmedical.com/Task?_id={task_id}",
-            headers={
-                'Authorization': f'Bearer {self.get_fhir_api_token()}',
-                'accept': 'application/json'
-            }
-        )
+        response = self.fhir.search("Task", {"id": task_id})
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to find task {response.text} {response.headers}")
+
+        return response.json()
 
     def update_fhir_task(self, task_id, payload):
         """ Given a Task ID and payload, we will add an additional comment to the Task
@@ -65,15 +65,10 @@ class SyncTask(ClinicalQualityMeasure):
         else:
             payload.update({'note': [new_note]})
 
-        requests.request(
-            "PUT",
-            f'https://fhir-{self.INSTANCE_NAME}.canvasmedical.com/Task/{task_id}',
-            headers={
-                'Authorization': f'Bearer {self.get_fhir_api_token()}',
-                'accept': 'application/json'
-            },
-            data=json.dumps(payload)
-        )
+        response = self.fhir.update("Task", task_id, payload)
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to update task {response.text} {response.headers}")
 
 
     def compute_results(self):
@@ -84,6 +79,9 @@ class SyncTask(ClinicalQualityMeasure):
 
             # field changes will contain the Task ID we can use in FHIR
             task_id = self.field_changes.get('external_id')
+
+            self.fhir = FumageHelper(self.settings)
+            fhir.get_fhir_api_token()
 
             fhir_response = self.get_fhir_task(task_id).json()['entry'][0]['resource']
 

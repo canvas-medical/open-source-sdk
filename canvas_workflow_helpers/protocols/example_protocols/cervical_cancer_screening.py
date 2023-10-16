@@ -1,5 +1,4 @@
 import arrow
-from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import (
     ClinicalQualityMeasure,
     ProtocolResult,
@@ -78,10 +77,6 @@ class CervicalCancerScreening(ClinicalQualityMeasure):
         identifiers = ["CervicalCancerScreening"]
 
         types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
 
         compute_on_change_types = [
             CHANGE_TYPE.CONDITION,

@@ -9,6 +9,7 @@ from canvas_workflow_kit.protocol import (
 )
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.value_set.value_set import ValueSet
+from canvas_workflow_kit.fhir import FumageHelper
 
 
 class Obesity(ValueSet):
@@ -26,51 +27,18 @@ class ReviewClaimTask(ClinicalQualityMeasure):
         compute_on_change_types = [CHANGE_TYPE.CONDITION, CHANGE_TYPE.BILLING_LINE_ITEM]
         notification_only = True
 
-    token = None
-
     # CHANGE FOR GIVEN INSTNACE
     CANVAS_BOT_KEY = '5eede137ecfe4124b8b773040e33be14'
     ASSIGNING_GROUP_ID = 'ddb6ae91-826c-431c-808b-b7a1f14b2bbb'
 
-    def get_fhir_api_token(self):
-        """Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token"""
-
-        grant_type = "client_credentials"
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            "POST",
-            f"https://{self.settings.INSTANCE_NAME}.canvasmedical.com/auth/token/",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}",
-        )
-
-        if token_response.status_code != 200:
-            raise Exception('Unable to get a valid FHIR bearer token')
-
-        return token_response.json().get("access_token")
 
     def get_fhir_coverages(self):
         """Given a Patient, request a FHIR Coverage Resources"""
 
-        if not self.token:
-            return None
-
-        response = requests.get(
-            (
-                f"https://fhir-{self.settings.INSTANCE_NAME}.canvasmedical.com/"
-                f"Coverage?patient=Patient/{self.patient.patient_key}"
-            ),
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "accept": "application/json",
-            },
-        )
+        response = self.fhir.search("Coverage", {"patient": f"Patient/{self.patient.patient_key}"})
 
         if response.status_code != 200:
-            raise Exception('Failed to get FHIR Coverages for patient')
+            raise Exception(f'Failed to get FHIR Coverages for patient {response.text} {response.headers}')
 
         resources = response.json().get("entry", [])
         if len(resources) == 0:
@@ -87,10 +55,8 @@ class ReviewClaimTask(ClinicalQualityMeasure):
 
             # search FHIR to get the group ID
 
-            # First get a FHIR API Token
-            if not (token := self.get_fhir_api_token()):
-                return result
-            self.token = token
+            self.fhir = FumageHelper(self.settings)
+            fhir.get_fhir_api_token()
 
             group_number_found = False
             for coverage in self.get_fhir_coverages():
@@ -144,18 +110,10 @@ class ReviewClaimTask(ClinicalQualityMeasure):
                 }
             }
         })
-        response = requests.request(
-            "POST",
-            f"https://fhir-{self.settings.INSTANCE_NAME}.canvasmedical.com/Task",
-            headers={
-                'Authorization': f'Bearer {self.token}',
-                'accept': 'application/json'
-            },
-            data=payload
-        )
+        response = self.fhir.create("Task", payload)
 
         if response.status_code != 201:
-            raise Exception(f"Failed to create FHIR Task status {response.status_code} and payload {payload}")
+            raise Exception(f"Failed to create FHIR Task status {response.status_code} and payload {payload} {response.text} {response.headers}")
 
 
     def has_diagnosis_with_cpt_code(self, condition, cpt_code):

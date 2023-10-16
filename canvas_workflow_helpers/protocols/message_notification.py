@@ -5,10 +5,10 @@ from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
                                           ProtocolResult)
 from canvas_workflow_kit.utils import send_notification
+from canvas_workflow_kit.fhir import FumageHelper
 
 class MessagesListener(ClinicalQualityMeasure):
     class Meta:
-
         title = 'Message Notification'
         version = 'v0.0.1'
         description = 'Listens for message from both staff and patients and sends a notification.'
@@ -66,15 +66,23 @@ class MessagesListener(ClinicalQualityMeasure):
 
             model_name = self.field_changes.get("model_name")
 
+            fhir = FumageHelper(self.settings)
+            fhir.get_fhir_api_token()
+
             # Message tranmissions only happen when Staff is sending to a patient
             if model_name == 'messagetransmission':
                 message_id = (self.field_changes.get('fields')).get('message_id')
                 canvas_id = message_id[1]
                 message = self.patient.messages.filter(id=canvas_id)[0]
+
+                response = fhir.search("Communication", {'_id': message['externallyExposableId']})
+                if response.status_code != 200:
+                    raise Exception(f"Failed to find communication {message['externallyExposableId']} {response.text}")
+
                 self.base_payload = {
                     'canvas_patient_key': self.patient.patient['key'],
                     'message_info': message,
-                    'fhir_payload': self.get_fhir_communication(message['externallyExposableId'])
+                    'fhir_payload': response.json()
 
                 }
                 send_notification(self.notification_url, json.dumps(self.base_payload), self.headers)
@@ -84,11 +92,14 @@ class MessagesListener(ClinicalQualityMeasure):
                 canvas_id = self.field_changes.get("canvas_id")
                 message = self.patient.messages.filter(id=canvas_id)[0]
                 if message['sender']['type'] == 'Patient':
+                    response = fhir.search("Communication", {'_id': message['externallyExposableId']})
+                    if response.status_code != 200:
+                        raise Exception(f"Failed to find communication {message['externallyExposableId']} {response.text}")
+
                     self.base_payload = {
                         'canvas_patient_key': self.patient.patient['key'],
                         'message_info': message,
-                        'fhir_payload': self.get_fhir_communication(message['externallyExposableId'])
-
+                        'fhir_payload': response.json()
                     }
                     send_notification(self.notification_url, json.dumps(self.base_payload), self.headers)
 

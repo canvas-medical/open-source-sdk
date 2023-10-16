@@ -1,81 +1,79 @@
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (STATUS_NOT_APPLICABLE,
                                           ClinicalQualityMeasure,
                                           ProtocolResult)
+from canvas_workflow_kit.fhir import FumageHelper
 
 
 class AppointmentUpdate(ClinicalQualityMeasure):
-    """
-    Adds a meeting link to a Telehealth appointment after it is created
-    """
 
     class Meta:
         title = 'Appointment Update'
-
         version = 'v1.0.0'
-
         description = 'Adds a meeting link to a Telehealth appointment after it is created'
-
-        information = 'https://canvasmedical.com/'
-
-        identifiers = ['AppointmentUpdater']
-
         types = ['Update']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.APPOINTMENT]
-
-        authors = ['Canvas Medical']
-
-        references = ['Canvas Medical']
-
-        funding_source = ''
-
         notification_only = True
 
     meeting_link = 'https://www.google.com/search?q=video+call'
 
-    def get_new_field_value(self, field_name):
-        change_context_fields = self.field_changes.get('fields', {})
-        if field_name not in change_context_fields:
-            return None
-        return change_context_fields[field_name][1]
+    def is_appointment_telehealth(self, appointment_external_id):
+        appointment = self.patient.upcoming_appointments.filter(externallyExposableId=appointment_external_id)
+        if appointment:
+            return appointment[0]['noteType']['isTelehealth']
 
     def compute_results(self):
         result = ProtocolResult()
-        result.status = STATUS_NOT_APPLICABLE
 
-        change_context = self.field_changes
-
-        changed_model = change_context.get('model_name')
-        created = change_context.get('created')
+        changed_model = self.field_changes.get('model_name')
+        created = self.field_changes.get('created')
         # we only care about appointments that have been created
         if changed_model != 'appointment' or not created:
             return result
 
-        appointment_external_id = self.get_new_field_value(
-            'externally_exposable_id')
+        appointment_external_id = self.field_changes.get('external_id')
 
-        update_payload = {
-            'integration_type': 'Update Appointment',
-            'integration_source': 'Protocol',
-            'patient_identifier': {
-                'identifier_type': 'key',
-                'identifier': {
-                    'key': self.patient.patient['key']
-                }
+        if not self.is_appointment_telehealth(appointment_external_id):
+            return result
+
+        fhir = FumageHelper(self.settings)
+        fhir.get_fhir_api_token()
+
+        response = fhir.read("Appointment", appointment_external_id)
+        if response.status_code != 200:
+            raise Exception("Failed to search Appointments")
+
+        appointment = response.json()
+
+        if "contained" in appointment:
+            supporting_info_id = appointment['contained'][0]['id']
+        else:
+            supporting_info_id = "appointment-meeting-endpoint"
+            appointment['supportingInformation'].append({
+                "reference": f"#{supporting_info_id}",
+                "type": "Endpoint"
+            })
+
+        appointment['contained'] = [{
+            "resourceType": "Endpoint",
+            "id": supporting_info_id,
+            "status": "active",
+            "connectionType": {
+                "code": "https"
             },
-            'integration_payload': {
-                'appointment_id': appointment_external_id,
-                'meeting_link':
-                f'{self.meeting_link}+{appointment_external_id}'
-            }
-        }
+            "payloadType": [{
+                "coding":[{
+                    "code": "video-call"
+                }]
+            }],
+            "address": f'{self.meeting_link}+{appointment_external_id}'
+        }]
 
-        self.set_updates([update_payload])
+        response = fhir.update("Appointment", appointment_external_id, appointment)
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to update Appointment response with error: {response.text} headers: {response.headers}")
+
+        result.add_narrative(f"Successfully updated Appointment {appointment_external_id} meeting link")
 
         return result

@@ -3,7 +3,6 @@ from typing import Dict, Optional
 
 from cached_property import cached_property
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import (
     STATUS_DUE,
     STATUS_SATISFIED,
@@ -38,31 +37,13 @@ class PatientPriority(ClinicalQualityMeasure):
 
     class Meta:
         title = 'Patient Priority'
-
         version = '1.0.0'
-
         description = (
             'Protocol that displays patient priority based on Risk Questionnaire.')
-
-        identifiers = ['PatientPriority']
-
-        types = ['CQM']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
-        authors = [
-            'Canvas'
-        ]
-
+        types = ['']
         compute_on_change_types = [
             ClinicalQualityMeasure.CHANGE_INTERVIEW,
         ]
-
-        funding_source = ''
-
-        references = ['Written by Canvas']
 
     def last_interview(self, valueset) -> Optional[Dict]:
         interview = self.patient.interviews.find(valueset).last()

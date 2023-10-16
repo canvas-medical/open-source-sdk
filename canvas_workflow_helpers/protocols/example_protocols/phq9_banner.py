@@ -1,4 +1,3 @@
-from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import (
     ClinicalQualityMeasure,
     ProtocolResult,
@@ -17,30 +16,13 @@ class QuestionnairePhq9(ValueSet):
 
 
 class PHQ9HistoryBannerAlert(ClinicalQualityMeasure):
-    """
-    A Banner alert that displays the scores of the patient's last 3 completed PHQ9 questionnaires.
-    """
-
     class Meta:
         title = "PHQ9 History Banner Alert"
-
         version = "2023-v01"
-
         description = "A Banner alert that displays the scores of the patient's last 3 completed PHQ9 questionnaires."
-
-        information = "https://link_to_protocol_information"
-
         identifiers = ["PHQ9HistoryBanner"]
-
         types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.INTERVIEW]
-
-        authors = ["Canvas Example Medical Association (CEMA)"]
 
     def get_date_and_score(self, q):
         date = arrow.get(q.get("noteTimestamp")).format("MM/DD/YYYY")

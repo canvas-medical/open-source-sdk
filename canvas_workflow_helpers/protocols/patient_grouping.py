@@ -1,6 +1,3 @@
-# type: ignores
-
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.internal.integration_messages import (
     ensure_patient_in_group,
@@ -24,34 +21,13 @@ class PatientGrouping(ClinicalQualityMeasure):
 
     class Meta:
         title = 'Patient Grouping'
-
         version = '1.0.0'
-
-        information = ''
-
         description = (
             'Protocol that updates a patients membership in a group depending on a given consent. '
             'This particular example is of an opt-out based group membership. ')
-
         identifiers = ['PatientGrouping']
-
         types = ['CQM']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
-        authors = [
-            'Canvas'
-        ]
-
-        compute_on_change_types = [
-            CHANGE_TYPE.CONSENT
-        ]
-
-        funding_source = ''
-
-        references = ['Written by Canvas']
+        compute_on_change_types = [CHANGE_TYPE.CONSENT]
 
     def has_opt_out(self) -> bool:
         consents = self.patient.consents.filter(category__code=self.CONSENT_CODE)

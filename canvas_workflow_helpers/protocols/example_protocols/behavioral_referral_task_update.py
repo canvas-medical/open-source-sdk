@@ -1,6 +1,7 @@
 import requests
 from canvas_workflow_kit.protocol import ClinicalQualityMeasure, ProtocolResult
 from canvas_workflow_kit.constants import CHANGE_TYPE
+from canvas_workflow_kit.fhir import FumageHelper
 
 
 class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
@@ -57,22 +58,10 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
     def get_fhir_task(self):
         """Given a Task ID, request a FHIR Task Resource"""
 
-        if not self.token or not self.task_id:
-            return None
-
-        response = requests.get(
-            (
-                f"https://fhir-{self.settings.INSTANCE_NAME}.canvasmedical.com/"
-                f"Task?identifier={self.task_id}"
-            ),
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "accept": "application/json",
-            },
-        )
+        response = self.fhir.search("Task", {"identifier": self.task_id})
 
         if response.status_code != 200:
-            raise Exception('Failed to get FHIR Task')
+            raise Exception(f'Failed to get FHIR Task {self.task_id} {response.text} {response.headers}')
 
         resources = response.json().get("entry", [])
         if len(resources) == 0:
@@ -83,24 +72,10 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
     def update_fhir_task(self, task):
         """Given a Task ID and Task Resource perform a FHIR Task Update"""
 
-        if not self.token or not self.task_id:
-            return None
-
-        response = requests.put(
-            (
-                f"https://fhir-{self.settings.INSTANCE_NAME}.canvasmedical.com/"
-                f"Task/{self.task_id}"
-            ),
-            json=task,
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "accept": "application/json",
-                "content-type": "application/json",
-            },
-        )
+        response = fhir.update("Task", self.task_id, task)
 
         if response.status_code != 200:
-            raise Exception(f"Failed to mark Task as completed with {response.status_code} and payload {payload}")
+            raise Exception(f"Failed to mark Task as completed with {response.status_code} and payload {payload} {response.text} {response.headers}")
 
     def edit_task(self, task):
         """Given a Task update the payload to supply a Group extension and label"""
@@ -145,10 +120,8 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         and update the assignee and label
         """
 
-        # First get a FHIR API Token
-        if not (token := self.get_fhir_api_token()):
-            return result
-        self.token = token
+        self.fhir = FumageHelper(self.settings)
+        fhir.get_fhir_api_token()
 
         result = ProtocolResult()
 
