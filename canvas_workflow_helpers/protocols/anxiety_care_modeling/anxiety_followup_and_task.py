@@ -92,7 +92,7 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
                 }
             }
         })
-        response = self.fhir.creat("Task", payload)
+        response = self.fhir.create("Task", payload)
 
         if response.status_code != 201:
             raise Exception(f"Failed to create FHIR Task status {response.status_code} and payload {payload} {response.text} {response.headers}")
