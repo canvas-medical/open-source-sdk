@@ -16,7 +16,6 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         authors = ["Canvas Example Medical Association (CEMA)"]
         notification_only = True
 
-    token = None
     task_id = None
 
     # TODO: These are hard coded variables that can be updated based on your needs
@@ -34,26 +33,6 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
     referral_task_title = "Refer patient to Psychiatry (TBD)"
 
     ##################### HELPER FUNCTIONS ##################################
-
-    def get_fhir_api_token(self):
-        """Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token"""
-
-        grant_type = "client_credentials"
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            "POST",
-            f"https://{self.settings.INSTANCE_NAME}.canvasmedical.com/auth/token/",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}",
-        )
-
-        if token_response.status_code != 200:
-            raise Exception('Unable to get a valid FHIR bearer token')
-
-        return token_response.json().get("access_token")
 
     def get_fhir_task(self):
         """Given a Task ID, request a FHIR Task Resource"""
@@ -121,7 +100,6 @@ class BehvaioralReferralTaskUpdate(ClinicalQualityMeasure):
         """
 
         self.fhir = FumageHelper(self.settings)
-        fhir.get_fhir_api_token()
 
         result = ProtocolResult()
 

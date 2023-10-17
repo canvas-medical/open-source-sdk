@@ -22,23 +22,6 @@ class SyncTask(ClinicalQualityMeasure):
     URL = 'https://webhook.site/de73cb04-077e-489d-abca-3c31f29ac28d'
     INSTANCE_NAME = 'CHANGE-ME' # change this for the instance you are working on
 
-    def get_fhir_api_token(self):
-        """ Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token """
-
-        grant_type = "client_credentials"
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            "POST",
-            f'https://{self.INSTANCE_NAME}.canvasmedical.com/auth/token/',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}"
-        )
-
-        return token_response.json().get('access_token')
-
     def get_fhir_task(self, task_id):
         """ Given a Task ID we can perform a FHIR Task Search Request"""
         response = self.fhir.search("Task", {"id": task_id})
@@ -81,7 +64,6 @@ class SyncTask(ClinicalQualityMeasure):
             task_id = self.field_changes.get('external_id')
 
             self.fhir = FumageHelper(self.settings)
-            fhir.get_fhir_api_token()
 
             fhir_response = self.get_fhir_task(task_id).json()['entry'][0]['resource']
 

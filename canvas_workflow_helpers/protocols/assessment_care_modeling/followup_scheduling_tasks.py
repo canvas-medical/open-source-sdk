@@ -65,7 +65,6 @@ class SemiAnnualAssessmentFollowUpSchedulingTasks(ClinicalQualityMeasure):
                 return result
 
             self.fhir = FumageHelper(self.settings)
-            fhir.get_fhir_api_token()
 
             fhir_apt = self.get_fhir_appointment(appointment_id)
 

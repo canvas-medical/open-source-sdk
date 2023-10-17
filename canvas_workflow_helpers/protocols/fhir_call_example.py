@@ -27,7 +27,6 @@ class TestFhir(ClinicalQualityMeasure):
         result.status = STATUS_NOT_APPLICABLE
 
         fhir = FumageHelper(self.settings)
-        fhir.get_fhir_api_token()
 
         response = fhir.read("Patient", self.patient.patient['key'])
         if response.status_code != 200:

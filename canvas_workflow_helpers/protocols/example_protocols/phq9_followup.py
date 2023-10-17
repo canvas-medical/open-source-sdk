@@ -55,7 +55,6 @@ class PHQ9(ClinicalQualityMeasure):
     def get_fhir_appointments(self):
         """ Given a Task ID we can perform a FHIR Task Search Request"""
         fhir = FumageHelper(self.settings)
-        fhir.get_fhir_api_token()
 
         response = fhir.search("Appointment", 
             {"date": f"ge{self.interview_time[:10]}",

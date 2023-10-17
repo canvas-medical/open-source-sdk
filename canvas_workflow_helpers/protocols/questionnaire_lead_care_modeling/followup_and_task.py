@@ -190,7 +190,6 @@ class ScheduleInitialOfficeVisit(ClinicalQualityMeasure):
         result = ProtocolResult()
 
         self.fhir = FumageHelper(self.settings)
-        self.fhir.get_fhir_api_token()
 
         if self.in_denominator():
 

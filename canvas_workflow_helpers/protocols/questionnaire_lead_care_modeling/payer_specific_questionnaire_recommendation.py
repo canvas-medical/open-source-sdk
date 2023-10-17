@@ -107,7 +107,6 @@ class PayorSpecificQuestionnaireRecommendation(ClinicalQualityMeasure):
 
 
             self.fhir = FumageHelper(self.settings)
-            self.fhir.get_fhir_api_token()
 
             # trigger only on a check in action of an appointment
             if changed_model == 'notestatechangeevent' and self.get_new_field_value('state') == 'CVD':

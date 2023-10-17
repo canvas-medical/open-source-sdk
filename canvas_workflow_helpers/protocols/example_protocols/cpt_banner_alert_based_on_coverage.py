@@ -46,7 +46,6 @@ class CPTCoverageBannerAlert(ClinicalQualityMeasure):
 
             # First get a FHIR API Token
             self.fhir = FumageHelper(self.settings)
-            fhir.get_fhir_api_token()
 
             group_number_found = False
             for coverage in self.get_fhir_coverages():

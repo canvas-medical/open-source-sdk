@@ -37,7 +37,6 @@ class AppointmentUpdate(ClinicalQualityMeasure):
             return result
 
         fhir = FumageHelper(self.settings)
-        fhir.get_fhir_api_token()
 
         response = fhir.read("Appointment", appointment_external_id)
         if response.status_code != 200:

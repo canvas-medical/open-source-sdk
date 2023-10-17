@@ -180,7 +180,6 @@ class UpdateProgramStatus(ClinicalQualityMeasure):
         }
 
         fhir = FumageHelper(self.settings)
-        fhir.get_fhir_api_token()
         fhir.create("QuestionnaireResponse", payload)
 
     def compute_results(self):

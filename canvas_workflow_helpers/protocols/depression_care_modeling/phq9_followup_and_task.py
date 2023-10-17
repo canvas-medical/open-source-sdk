@@ -197,7 +197,6 @@ class FollowUpElevatedPHQ9(ClinicalQualityMeasure):
         result = ProtocolResult()
 
         self.fhir = FumageHelper(self.settings)
-        fhir.get_fhir_api_token()
 
         # Check if a patient has an elevated PHQ-9
         if self.in_denominator():

@@ -52,7 +52,6 @@ class SyncTask(ClinicalQualityMeasure):
             task_id = self.field_changes.get('external_id')
 
             fhir = FumageHelper(self.settings)
-            fhir.get_fhir_api_token()
 
             response = fhir.search("Task", {"_id": task_id})
             if response.status_code != 200:

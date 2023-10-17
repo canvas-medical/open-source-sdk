@@ -196,7 +196,6 @@ class FollowUpAnxiety(ClinicalQualityMeasure):
         result = ProtocolResult()
 
         self.fhir = FumageHelper(self.settings)
-        fhir.get_fhir_api_token()
 
         # Check if a patient has anxiety
         if self.in_denominator():

@@ -56,7 +56,6 @@ class ReviewClaimTask(ClinicalQualityMeasure):
             # search FHIR to get the group ID
 
             self.fhir = FumageHelper(self.settings)
-            fhir.get_fhir_api_token()
 
             group_number_found = False
             for coverage in self.get_fhir_coverages():
