@@ -14,6 +14,7 @@ from canvas_workflow_kit.value_set.v2021.diagnosis import (
     Type1Diabetes,
 )
 from canvas_workflow_kit.value_set.v2021.lab_test import Hba1CLaboratoryTest
+from canvas_workflow_kit.fhir import FumageHelper
 
 
 class WeightLossProgramStatusQuestionnaire(ValueSet):
@@ -81,7 +82,6 @@ class UpdateProgramStatus(ClinicalQualityMeasure):
         ]
         notification_only = True
 
-    instance_name = 'protocol-gallery-preview'
     questionnaire_id = '3ee30e27-a18f-4fc2-bdbc-5af3827590ce'
     link_id = '21ba40f3-0416-48b8-8a96-234592e91b03'
     practitioner_id = '5eede137ecfe4124b8b773040e33be14'
@@ -154,47 +154,6 @@ class UpdateProgramStatus(ClinicalQualityMeasure):
             return 'Condition screening'
         return 'Disqualified' if self.has_abnormal_tests() else 'Treatment'
 
-    def get_fhir_api_token(self):
-        """Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token"""
-
-        grant_type = 'client_credentials'
-
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            'POST',
-            f'https://{self.instance_name}.canvasmedical.com/auth/token/',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            data=f'grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}',
-        )
-
-        if token_response.status_code != 200:
-            raise requests.ConnectionError(
-                ('Unable to get a valid FHIR bearer token')
-            )
-
-        return token_response.json().get('access_token')
-
-    def get_fhir_medicationrequest(self, prescription_id):
-        """Given a Task ID we can perform a FHIR Task Search Request"""
-        response = requests.get(
-            (
-                f'https://fhir-{self.instance_name}.canvasmedical.com/'
-                f'MedicationRequest/{prescription_id}'
-            ),
-            headers={
-                'Authorization': f'Bearer {self.get_fhir_api_token()}',
-                'accept': 'application/json',
-            },
-        )
-
-        if response.status_code != 200:
-            raise requests.ConnectionError('Failed to search Appointments')
-
-        return response.json()
-
     def post_fhir_questionnaireresponse(self, status_display):
         payload = {
             'resourceType': 'QuestionnaireResponse',
@@ -219,15 +178,9 @@ class UpdateProgramStatus(ClinicalQualityMeasure):
                 }
             ],
         }
-        requests.request(
-            'POST',
-            f'https://fhir-{self.instance_name}.canvasmedical.com/QuestionnaireResponse',
-            headers={
-                'Authorization': f'Bearer {self.get_fhir_api_token()}',
-                'accept': 'application/json',
-            },
-            data=json.dumps(payload),
-        )
+
+        fhir = FumageHelper(self.settings)
+        fhir.create("QuestionnaireResponse", payload)
 
     def compute_results(self):
         result = ProtocolResult()

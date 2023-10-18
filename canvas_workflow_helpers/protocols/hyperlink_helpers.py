@@ -1,4 +1,3 @@
-from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import STATUS_DUE, ClinicalQualityMeasure, ProtocolResult
 from canvas_workflow_kit.recommendation import HyperlinkRecommendation
 
@@ -10,28 +9,12 @@ class HyperlinkHelpers(ClinicalQualityMeasure):
 
     class Meta:
         title = 'External Links'
-
         version = 'v1.0.0'
-
         description = 'Creates external dynamic hyperlinks at the top of the protocol list'
-
-        information = 'https://canvasmedical.com/'
-
         identifiers = ['ExternalLinks']
-
         types = ['Links']
-
         references = ['Links to external resources about the patient']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         authors = ['Canvas Medical']
-
-        funding_source = ''
-
-        can_be_snoozed = False
 
     def patient_external_id(self):
         if self.patient.patient.get('externalIdentifiers'):

@@ -2,7 +2,6 @@ from typing import cast
 
 import arrow
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import (
     CONTEXT_REPORT,
     STATUS_DUE,
@@ -43,41 +42,7 @@ EncounterForMammographCondition = {
 }
 
 
-class BreastCancerScreening(ClinicalQualityMeasure):
-    """
-    Breast Cancer Screening
-
-    Description: Percentage of women 50-74 years of age who had a mammogram to screen for breast
-    cancer
-
-    Definition: None
-
-    Rationale: Breast cancer is one of the most common types of cancers, accounting for a quarter
-    of all new cancer diagnoses for women in the U.S. (BreastCancer.Org, 2011). It ranks as the
-    second leading cause of cancer-related mortality in women, accounting for nearly 40,000
-    estimated deaths in 2013 (American Cancer Society, 2011).
-
-    According to the National Cancer Institute's Surveillance Epidemiology and End Results program,
-    the chance of a woman being diagnosed with breast cancer in a given year increases with age. By
-    age 30, it is one in 2,212. By age 40, the chances increase to one in 235, by age 50, it
-    becomes one in 54, and, by age 60, it is one in 25. From 2004 to 2008, the median age at the
-    time of breast cancer diagnosis was 61 years among adult women (Tangka et al, 2010).
-
-    In the U.S., costs associated with a diagnosis of breast cancer range from $451 to $2,520,
-    factoring in continued testing, multiple office visits, and varying procedures. The total costs
-    related to breast cancer add up to nearly $7 billion per year in the U.S., including $2 billion
-    spent on late-stage treatment (Lavigne et al, 2008; Boykoff et al, 2009).
-
-    Guidance: Patient self-report for procedures as well as diagnostic studies should be recorded
-    in 'Procedure, Performed' template or 'Diagnostic Study, Performed' template in QRDA-1. Patient
-    self-report is not allowed for laboratory tests.
-
-    This measure evaluates primary screening. Do not count biopsies, breast ultrasounds, MRIs or
-    tomosynthesis (3D mammography), because they are not appropriate methods for primary breast
-    cancer screening.
-
-    More information: https://ecqi.healthit.gov/sites/default/files/ecqm/measures/CMS125v6.html
-    """
+class BreastCancerScreeningUpdate(ClinicalQualityMeasure):
 
     class Meta:
         title = "Breast Cancer Screening"
@@ -96,17 +61,8 @@ class BreastCancerScreening(ClinicalQualityMeasure):
         )
 
         identifiers = ["BreastCancerScreening"]
-
         types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
-        authors = [
-            "National Committee for Quality Assurance",
-        ]
-
+        authors = ["National Committee for Quality Assurance",]
         references = [
             "American Cancer Society. 2010. Cancer Facts & Figures 2010. Atlanta: American Cancer Society.",
             'National Cancer Institute. 2010. "Breast Cancer Screening." http://www.cancer.gov/cancertopics/pdq/screening/breast/healthprofessional',

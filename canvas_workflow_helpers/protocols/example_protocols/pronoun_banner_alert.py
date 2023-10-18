@@ -1,4 +1,3 @@
-from canvas_workflow_kit import events
 from canvas_workflow_kit.protocol import (
     ClinicalQualityMeasure,
     ProtocolResult,
@@ -15,30 +14,14 @@ class PronounQuestionnaire(ValueSet):
 
 
 class PronounBannerAlert(ClinicalQualityMeasure):
-    """
-    Banner alert that displays the patient's response to a pronoun questionnaire
-    """
 
     class Meta:
         title = "Pronoun Banner Alert"
-
         version = "2023-v01"
-
         description = "Banner alert that displays the patient's response to a pronoun questionnaire"
-
-        information = "https://link_to_protocol_information"
-
         identifiers = ["PronounBannerAlert"]
-
         types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.INTERVIEW]
-
-        authors = ["Canvas Example Medical Association (CEMA)"]
 
     def get_pronoun_questionnaire(self):
         return (

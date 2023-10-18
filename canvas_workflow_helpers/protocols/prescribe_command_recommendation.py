@@ -32,30 +32,13 @@ class PrescribeButton(ClinicalQualityMeasure):
     class Meta:
 
         title = 'Prescribe Button'
-
         version = 'v1.0.0'
-
         description = 'A protocol w/ a prescribe button recommendation'
-
-        information = 'https://canvasmedical.com/'
-
         identifiers = ['Prescribe']
-
         types = ['Orders']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [
             CHANGE_TYPE.MEDICATION, CHANGE_TYPE.CONDITION
         ]
-
-        authors = ['Canvas Medical']
-
-        references = ['Canvas Medical']
-
-        funding_source = ''
 
     nausea = None
 

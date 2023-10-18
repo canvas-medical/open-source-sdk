@@ -29,38 +29,12 @@ class SemiAnnualAssessmentFollowUpSchedulingTasks(ClinicalQualityMeasure):
 
     CANVAS_BOT_KEY = '5eede137ecfe4124b8b773040e33be14'
 
-    def get_fhir_api_token(self):
-        """ Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token """
-
-        grant_type = "client_credentials"
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            "POST",
-            f'https://{self.instance_name}.canvasmedical.com/auth/token/',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}"
-        )
-
-        if token_response.status_code != 200:
-            raise Exception('Unable to get a valid FHIR bearer token')
-
-        return token_response.json().get('access_token')
-
     def get_fhir_appointment(self, apt_id):
         """ Given a Apt ID we can perform a FHIR Appointment Read Request"""
-        response = requests.get(
-            f"https://fhir-{self.instance_name}.canvasmedical.com/Appointment/{apt_id}",
-            headers={
-                'Authorization': f'Bearer {self.token}',
-                'accept': 'application/json'
-            }
-        )
+        response = self.fhir.read("Appointment", apt_id)
 
         if response.status_code != 200:
-            raise Exception('Failed to get FHIR Appointment: ', apt_id)
+            raise Exception(f'Failed to get FHIR Appointment: {apt_id} {response.text} {response.headers}')
 
         return response.json()
 
@@ -90,8 +64,7 @@ class SemiAnnualAssessmentFollowUpSchedulingTasks(ClinicalQualityMeasure):
             if not appointment_id:
                 return result
 
-            self.instance_name = self.settings.INSTANCE_NAME
-            self.token = self.get_fhir_api_token()
+            self.fhir = FumageHelper(self.settings)
 
             fhir_apt = self.get_fhir_appointment(appointment_id)
 

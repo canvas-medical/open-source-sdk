@@ -1,7 +1,6 @@
 import arrow
 import requests
 
-from canvas_workflow_kit import events
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (
     STATUS_DUE,
@@ -11,6 +10,7 @@ from canvas_workflow_kit.protocol import (
 )
 from canvas_workflow_kit.recommendation import FollowUpRecommendation, ReferRecommendation
 from canvas_workflow_kit.value_set.value_set import ValueSet
+from canvas_workflow_kit.fhir import FumageHelper
 
 
 class QuestionnairePhq9(ValueSet):
@@ -43,55 +43,28 @@ class PHQ9(ClinicalQualityMeasure):
 
     class Meta:
         title = "PHQ9 Follow up"
-
         version = "2023-v01"
-
         description = "This protocol recommends a follow-up behavioral appointment for patients with a PHQ9 score >= 10"
-
-        information = "https://link_to_protocol_information"
-
         identifiers = ["PHQ9Appointment"]
-
         types = ["CQM"]
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.APPOINTMENT, CHANGE_TYPE.REFERRAL_REPORT]
-
-        authors = ["Canvas Example Medical Association (CEMA)"]
 
         score = None
         interview_time = None
 
-    def get_fhir_api_token(self):
-        """ Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token """
-
-        grant_type = "client_credentials"
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            "POST",
-            f'https://{self.instance_name}.canvasmedical.com/auth/token/',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}"
-        )
-
-        return token_response.json().get('access_token')
-
     def get_fhir_appointments(self):
         """ Given a Task ID we can perform a FHIR Task Search Request"""
-        return requests.get(
-            (f"https://fhir-{self.instance_name}.canvasmedical.com/"
-             f"Appointment?date=ge{self.interview_time[:10]}&patient=Patient/{self.patient.patient_key}"),
-            headers={
-                'Authorization': f'Bearer {self.get_fhir_api_token()}',
-                'accept': 'application/json'
-            }
-        ).json()
+        fhir = FumageHelper(self.settings)
+
+        response = fhir.search("Appointment", 
+            {"date": f"ge{self.interview_time[:10]}",
+             "patient": f"Patient/{self.patient.patient_key}"})
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to find appointments {response.text} {response.headers}")
+
+        return response.json()
+
 
     def in_denominator(self):
         """

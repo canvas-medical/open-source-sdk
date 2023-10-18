@@ -7,6 +7,7 @@ from canvas_workflow_kit.protocol import (
 )
 from canvas_workflow_kit.constants import CHANGE_TYPE, AlertPlacement, AlertIntent
 from canvas_workflow_kit.intervention import BannerAlertIntervention
+from canvas_workflow_kit.fhir import FumageHelper
 
 
 class CPTCoverageBannerAlert(ClinicalQualityMeasure):
@@ -19,47 +20,13 @@ class CPTCoverageBannerAlert(ClinicalQualityMeasure):
         compute_on_change_types = [CHANGE_TYPE.COVERAGE]
         notification_only = True
 
-    token = None
-
-    def get_fhir_api_token(self):
-        """Given the Client ID and Client Secret for authentication to FHIR,
-        return a bearer token"""
-
-        grant_type = "client_credentials"
-        client_id = self.settings.CLIENT_ID
-        client_secret = self.settings.CLIENT_SECRET
-
-        token_response = requests.request(
-            "POST",
-            f"https://{self.settings.INSTANCE_NAME}.canvasmedical.com/auth/token/",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data=f"grant_type={grant_type}&client_id={client_id}&client_secret={client_secret}",
-        )
-
-        if token_response.status_code != 200:
-            raise Exception('Unable to get a valid FHIR bearer token')
-
-        return token_response.json().get("access_token")
-
     def get_fhir_coverages(self):
         """Given a Patient, request a FHIR Coverage Resources"""
 
-        if not self.token:
-            return None
-
-        response = requests.get(
-            (
-                f"https://fhir-{self.settings.INSTANCE_NAME}.canvasmedical.com/"
-                f"Coverage?patient=Patient/{self.patient.patient_key}"
-            ),
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "accept": "application/json",
-            },
-        )
+        response = self.fhir.search("Coverage": {"patient": f"Patient/{self.patient.patient_key}"})
 
         if response.status_code != 200:
-            raise Exception('Failed to get FHIR Coverages for patient')
+            raise Exception(f'Failed to get FHIR Coverages for patient {response.text} {response.headers}')
 
         resources = response.json().get("entry", [])
         if len(resources) == 0:
@@ -78,9 +45,7 @@ class CPTCoverageBannerAlert(ClinicalQualityMeasure):
             # search FHIR to get the group ID
 
             # First get a FHIR API Token
-            if not (token := self.get_fhir_api_token()):
-                return result
-            self.token = token
+            self.fhir = FumageHelper(self.settings)
 
             group_number_found = False
             for coverage in self.get_fhir_coverages():

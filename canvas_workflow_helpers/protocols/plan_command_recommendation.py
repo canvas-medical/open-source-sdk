@@ -14,28 +14,12 @@ class PlanCommand(ClinicalQualityMeasure):
     class Meta:
 
         title = 'Plan Button'
-
         version = 'v1.0.0'
-
         description = 'A protocol w/ a plan button recommendation'
-
         information = 'https://canvasmedical.com/'
-
         identifiers = ['Plan']
-
         types = ['Recommendations']
-
-        responds_to_event_types = [
-            events.HEALTH_MAINTENANCE,
-        ]
-
         compute_on_change_types = [CHANGE_TYPE.CONDITION]
-
-        authors = ['Canvas Medical']
-
-        references = ['Canvas Medical']
-
-        funding_source = ''
 
     def in_denominator(self):
         """
