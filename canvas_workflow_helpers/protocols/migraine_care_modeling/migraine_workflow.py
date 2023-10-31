@@ -111,6 +111,7 @@ class PrescriptionRecommendationQuestionnaire(ValueSet):
 class PatientEducationQuestionnaire(ValueSet):
     VALUE_SET_NAME = 'Patient Education'
     INTERNAL = {'medication_education'}
+    FHIR_ID = '2cd73b10-4343-4689-875f-c033349e6dd5'
 
 class MedicationAcceptanceQuestionnaire(ValueSet):
     VALUE_SET_NAME = 'Medication Acceptance'
@@ -127,25 +128,23 @@ PROVIDER_ROLE = {
     "display": "Cove Provider"
 }
 
-EncounterForMigraineCondition = {
-    "code": "G43909",
-    "system": "ICD-10",
-    "display": "Migraine, unspecified, not intractable, without status migrainosus",
-}
-
 class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
     class Meta:
         title = 'Cove Recommendations'
         version = '2023-v1'
         description = 'This protocol will go through the different stages of the Cove Business Line Workflow'
         types = [""]
-        compute_on_change_types = [CHANGE_TYPE.CONDITION, CHANGE_TYPE.PRESCRIPTION, CHANGE_TYPE.INTERVIEW]
+        compute_on_change_types = [CHANGE_TYPE.CONDITION, CHANGE_TYPE.PRESCRIPTION, CHANGE_TYPE.INTERVIEW, CHANGE_TYPE.MEDICATION]
         notification_only = False # add this so your protocol doesn't try to recompute on upload
 
     def chosen_meds_prescibed(self):
         for drug in self.chosen_meds:
-            if not self.patient.prescriptions.find(drug).filter(status='active').records:
+            records = self.patient.prescriptions.find(drug).filter(status='active').records
+            if not records:
                 return False
+            else:
+                medication = self.patient.medications.filter(id=records[0]['medicationId']).records[0]
+                self.drug_dates.append(f"{drug.VALUE_SET_NAME} on {medication['periods'][0]['from']}")
 
         return len(self.chosen_meds)
 
@@ -172,23 +171,35 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
 
         return len(self.chosen_meds)
 
-    def build_prescription_recs(self, result):
-        for drug in self.prescribed_rec:
-            prescribe_recommendation = PrescribeRecommendation(
-                    key=f'RECOMMEND_{drug.VALUE_SET_NAME}_PRESCRIPTION',
-                    rank=1,
-                    button='Prescribe',
-                    patient=self.patient,
-                    prescription=drug,
-                    title=f'Prescribe {drug.VALUE_SET_NAME}',
-                    context={
-                        'conditions': [self.conditions],
-                        **drug.FIELDS
-                }
-            )
-            result.add_recommendation(prescribe_recommendation)
+    def build_prescription_recs(self, result, ls):
+        for drug in ls:
+            if not self.patient.prescriptions.find(drug).filter(status='active').records:
+                prescribe_recommendation = PrescribeRecommendation(
+                        key=f'RECOMMEND_{drug.VALUE_SET_NAME}_PRESCRIPTION',
+                        rank=1,
+                        button='Prescribe',
+                        patient=self.patient,
+                        prescription=drug,
+                        title=f'Prescribe {drug.VALUE_SET_NAME}',
+                        context={
+                            'conditions': [self.conditions],
+                            **drug.FIELDS
+                    }
+                )
+                result.add_recommendation(prescribe_recommendation)
         return result
 
+    def build_interview_rec(self, result, questionnaire):
+        interview_recommendation = InterviewRecommendation(
+            key=f'RECOMMEND_{questionnaire.VALUE_SET_NAME}_QUES',
+            rank=1,
+            button='Interview',
+            patient=self.patient,
+            questionnaires=[questionnaire],
+            title=f'Please fill out {questionnaire.VALUE_SET_NAME} questionnaire'
+        )
+        result.add_recommendation(interview_recommendation)
+        return result
 
     def prescribed_rec_interview_submitted(self, interview):
         for response in interview['responses']:
@@ -218,6 +229,30 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
             )
         )
         return result
+    
+    def patient_education_interview_id(self):
+        """ Patient has submitted the Migraine Intake Questionnaire """
+        interviews = self.patient.interviews.find(PatientEducationQuestionnaire)
+        if len(interviews):
+
+            date = arrow.get(interviews.last()['noteTimestamp'])
+
+            # find the record in FHIR
+            response = self.fhir.search("QuestionnaireResponse", {
+                "patient": f"Patient/{self.patient.patient_key}",
+                "questionnaire": f"Questionnaire/{PatientEducationQuestionnaire.FHIR_ID}",
+                "authored": f"eq{date.format('YYYY-MM-DD')}"
+            })
+
+            if response.status_code != 200:
+                raise Exception(f"FHIR Questionnaire Responses could not be fetched: {response.text} and fumage_correlation_id: {response.headers['fumage-correlation-id']}")
+
+            for entry in response.json().get('entry', []):
+                if arrow.get(entry['resource']['authored']) == date:
+                    return entry['resource']['id']
+
+        return None
+
     def intake_submitted(self):
         """ Patient has submitted the Migraine Intake Questionnaire """
         interviews = self.patient.interviews.find(MigraineIntakeQuestionnaire)
@@ -320,16 +355,48 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
 
         return questionnaire['questionnaires'][0]['code'] in value_set.INTERNAL
 
+    def check_if_last_prescription_committed(self, result):
+        # lets check the record triggering this was the final drug needed
+        if self.field_changes.get('model_name') == 'prescription' and self.field_changes.get('created'):
+            read_response = self.fhir.read("MedicationRequest", self.field_changes['external_id'])
+
+            if read_response.status_code != 200:
+                raise Exception(f"Failed to fetch FHIR MedicationRequest/{self.field_changes['external_id']} with {read_response.text} and fumage_correlation_id {read_response.headers['fumage-correlation-id']}")
+
+            record = read_response.json()
+
+            if record['status'] == 'active' and record['intent'] == 'order':
+                coding = [c['code'] for c in record['medicationCodeableConcept']['coding'] if c['system'] == 'http://www.fdbhealth.com/']
+                
+                if coding and coding[0] in [list(drug.FDB)[0] for drug in self.chosen_meds]:
+                    staff = [c['staff']['key'] for c in self.patient.patient['careTeamMemberships'] if c['role']['code'] == PROVIDER_ROLE['code']]
+
+                    # create Task
+                    if not self.patient.tasks.filter(status='OPEN', title='New treatment follow up in one month').records:
+                        self.create_fhir_task(
+                            title='New treatment follow up in one month', 
+                            staff={
+                                "reference": f"Practitioner/{staff[0] if staff else self.settings['CANVAS_BOT']}",
+                                "type": "Practitioner"
+                            }, 
+                            label='Cove', 
+                            note_text=f"{self.patient.first_name} was started on these medications: <br>" + '\n'.join(self.drug_dates), 
+                            due=self.now)
+
+                    send_notification(
+                        "https://webhook.site/8f236112-e28c-41df-9c76-0888de0535a1", 
+                        json.dumps({
+                            'patient_identifier': ",".join(self.identifiers) if self.identifiers else self.patient.patient_key,
+                            'chosen medications': [drug.VALUE_SET_NAME for drug in self.chosen_meds],
+                            'narrative': 'Prescriptions sent to pharmacy.  Please reach out if you have additional quesitons'
+                        }), 
+                        {'Content-Type': 'application/json'})
+                    result.add_narrative("Notification sent")
+        return result
+
     def compute_results(self):
         result = ProtocolResult()
         result.status = STATUS_NOT_APPLICABLE
-
-        # self.settings = {
-        #     'CANVAS_BOT': '5eede137ecfe4124b8b773040e33be14',
-        #     'INSTANCE_NAME': 'thirtymadison-preview',
-        #     'CLIENT_ID': 'qj10xbwWfWh7qSChjtU901RnA4obtGBBV5Wsr7Pk',
-        #     'CLIENT_SECRET': 'U8EsEF2HjfMWw0AKmX5a5TE50TWnL742SWO6gsR5yI6lbND7G9xWZw2rMgomAw8N8c6NSC9Ud8VGXR4MvDHriToKqwRGHv72cKTwWxr9rZzto5HohfGyG0X710MGJO3g'
-        # }
 
         self.fhir = FumageHelper(self.settings)
         self.now = arrow.now().isoformat()
@@ -339,9 +406,11 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
         self.prescribed_rec = []
         self.chosen_meds = []
         self.patient_approval = None
+        self.drug_dates = []
 
         has_diagnosis = self.has_diagnosis()
         patient_education_submitted = self.patient_education_submitted()
+        self.identifiers = [i['value'] for i in self.patient.patient['externalIdentifiers'] if i['system'] == "ThirtyMadison"]
 
         questionnaires = sorted(
             self.patient.interviews.find(PrescriptionRecommendationQuestionnaire | PatientEducationQuestionnaire | MedicationAcceptanceQuestionnaire | MigraineIntakeQuestionnaire),
@@ -354,23 +423,7 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
             result.status = STATUS_DUE
             result = self.add_banner_alert(result, "Cove: Patient Treatment Active")
 
-            # create Task
-            if not self.patient.tasks.filter(status='OPEN', title='New treatment follow up in one month').records:
-                self.create_fhir_task(
-                    title='New treatment follow up in one month', 
-                    staff=self.intake_interview['author'], 
-                    label='Cove', 
-                    note_text=f"{self.patient.patient_key} was started on these medication: <br>" + '\n'.join([drug.VALUE_SET_NAME for drug in self.chosen_meds]), 
-                    due=self.now)
-
-            send_notification(
-                "https://webhook.site/8f236112-e28c-41df-9c76-0888de0535a1", 
-                json.dumps({
-                    'patient_identifier': identifier['value'] if identifier else self.patient.patient_key,
-                    'chosen medications': [drug.VALUE_SET_NAME for drug in self.chosen_meds],
-                    'narrative': 'Prescriptions sent to pharmacy.  Please reach out if you have additional quesitons'
-                }), 
-                {'Content-Type': 'application/json'})
+            result = self.check_if_last_prescription_committed(result)
 
         elif has_diagnosis and self.questionnaire_matches(last_filled_questionnaire, MedicationAcceptanceQuestionnaire) and self.patient_approval_submitted(last_filled_questionnaire) is not None:
             result.due_in = -1
@@ -378,34 +431,31 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
             result = self.add_banner_alert(result, "Cove: Patient Active")
 
             if self.patient_approval:
-                result = self.build_prescription_recs(result)
+                result = self.build_prescription_recs(result, self.chosen_meds)
                 result.add_narrative(f'{self.patient.first_name} has approved the recommended prescriptions. Please send the prescriptions to the pharmacy')
             else:
                 result.add_narrative(f'{self.patient.first_name} did not approve the recommended prescriptions. Please review other prescription options')
-                interview_recommendation = InterviewRecommendation(
-                    key='RECOMMEND_PRESCRIBE_REC_QUES',
-                    rank=4,
-                    button='Interview',
-                    patient=self.patient,
-                    questionnaires=[PrescriptionRecommendationQuestionnaire],
-                    title='Please fill out prescription recommendation questionnaire'
-                )
-                result.add_recommendation(interview_recommendation)
+                result = self.build_interview_rec(result, PrescriptionRecommendationQuestionnaire)
 
         elif has_diagnosis and self.questionnaire_matches(last_filled_questionnaire, PatientEducationQuestionnaire) and patient_education_submitted:
             result.due_in = -1
             result.status = STATUS_DUE
             result = self.add_banner_alert(result, "Cove: Patient Active")
 
-            identifier = any(i['system'] == "ThirtyMadison" for i in self.patient.patient['externalIdentifiers'])
-            send_notification(
-                "https://webhook.site/8f236112-e28c-41df-9c76-0888de0535a1", 
-                json.dumps({
-                    'patient_identifier': identifier['value'] if identifier else self.patient.patient_key,
-                    'chosen medications': [drug.VALUE_SET_NAME for drug in self.chosen_meds],
-                    'narrative': 'Please select the following treatments that you would like to share information with the patient via the Cove app'
-                }), 
-                {'Content-Type': 'application/json'})
+            if (self.field_changes.get('model_name') == 'interview' and 
+                self.field_changes.get('created') and
+                self.field_changes.get('external_id') == self.patient_education_interview_id()):
+                
+                send_notification(
+                    "https://webhook.site/8f236112-e28c-41df-9c76-0888de0535a1", 
+                    json.dumps({
+                        'patient_identifier': ",".join(self.identifiers) if self.identifiers else self.patient.patient_key,
+                        'chosen medications': [drug.VALUE_SET_NAME for drug in self.chosen_meds],
+                        'narrative': 'Please select the following treatments that you would like to share information with the patient via the Cove app'
+                    }), 
+                    {'Content-Type': 'application/json'})
+                result.add_narrative("Notification sent")
+
         elif has_diagnosis and self.questionnaire_matches(last_filled_questionnaire, PrescriptionRecommendationQuestionnaire) and self.prescribed_rec_interview_submitted(last_filled_questionnaire):
             result.due_in = -1
             result.status = STATUS_DUE
@@ -413,43 +463,25 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
                 "Complete the Patient Education questionnaire to send information to patient via Cove app for patient approval prior to sending prescription.")
 
             result = self.add_banner_alert(result, "Cove: Patient Active")
-            result = self.build_prescription_recs(result)
-
-            interview_recommendation = InterviewRecommendation(
-                key='RECOMMEND_PATIENT_EDUCATION_QUES',
-                rank=4,
-                button='Interview',
-                patient=self.patient,
-                questionnaires=[PatientEducationQuestionnaire],
-                title='Please fill out Patient Education questionnaire'
-            )
-            result.add_recommendation(interview_recommendation)
+            result = self.build_prescription_recs(result, self.prescribed_rec)
+            result = self.build_interview_rec(result, PatientEducationQuestionnaire)
 
         elif has_diagnosis:
             result.due_in = -1
             result.status = STATUS_DUE
             
             result = self.add_banner_alert(result, "Cove: Patient Active")
-
-            interview_recommendation = InterviewRecommendation(
-                key='RECOMMEND_PRESCRIBE_REC_QUES',
-                rank=4,
-                button='Interview',
-                patient=self.patient,
-                questionnaires=[PrescriptionRecommendationQuestionnaire],
-                title='Please fill out prescription recommendation questionnaire'
-            )
-            result.add_recommendation(interview_recommendation)
+            result = self.build_interview_rec(result, PrescriptionRecommendationQuestionnaire)
 
             condition_names = " and ".join([f"\'{c['display']}\'" for c in self.conditions])
             result.add_narrative(f'{self.patient.first_name} has a diagnosis of {condition_names}. Please review prescription options')
+        
         elif self.questionnaire_matches(last_filled_questionnaire, MigraineIntakeQuestionnaire) and self.intake_submitted():
             # Cove Intake completed
             result.due_in = -1
             result.status = STATUS_DUE
             
             result = self.add_banner_alert(result, "Cove: Intake Complete")
-
             self.update_care_team(self.intake_interview['author'], PROVIDER_ROLE)
 
             answers = []
@@ -460,8 +492,11 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
                 if coding['code'] == 'migint-133':
                     diagnose_rec_needed = True
 
-            # create Task
-            if not self.patient.tasks.filter(status='OPEN', title='Review New Intake').records:
+            if (self.field_changes.get('model_name') == 'interview' and 
+                self.field_changes.get('created') and
+                self.field_changes.get('external_id') == self.intake_interview['id'] and
+                not self.patient.tasks.filter(status='OPEN', title='Review New Intake').records):
+                
                 self.create_fhir_task(
                     title='Review New Intake', 
                     staff=self.intake_interview['author'], 
