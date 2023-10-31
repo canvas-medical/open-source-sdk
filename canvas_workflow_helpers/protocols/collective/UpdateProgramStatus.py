@@ -167,7 +167,7 @@ class UpdateProgramStatus(ClinicalQualityMeasure):
                     'answer': [
                         {
                             'valueCoding': {
-                                'system': f'http://schemas.{self.instance_name}.canvasmedical.com/fhir/systems/internal',
+                                'system': f'http://schemas.{self.settings.INSTANCE_NAME}.canvasmedical.com/fhir/systems/internal',
                                 'code': status_display_to_coding[
                                     status_display
                                 ],
