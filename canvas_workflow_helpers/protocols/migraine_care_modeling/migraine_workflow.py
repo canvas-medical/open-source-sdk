@@ -116,6 +116,7 @@ class PatientEducationQuestionnaire(ValueSet):
 class MedicationAcceptanceQuestionnaire(ValueSet):
     VALUE_SET_NAME = 'Medication Acceptance'
     INTERNAL = {'medcon123'}
+    FHIR_ID = '12f68f8a-ed40-4482-a010-8207df8a5e5c'
 
 class MigraineIntakeQuestionnaire(ValueSet):
     VALUE_SET_NAME = 'Migraine Intake'
@@ -148,16 +149,40 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
 
         return len(self.chosen_meds)
 
-    def patient_approval_submitted(self, interview):
-        for response in interview['responses']:
-            if response['code'] == 'medcon125': # yes
-                self.patient_approval = True 
-                return True
-            elif response['code'] == 'medcon126': # no
-                self.patient_approval = False
-                return False
+    def patient_approval_submitted(self):
+        interviews = self.patient.interviews.find(MedicationAcceptanceQuestionnaire)
 
-        return None
+        self.patient_approval = None
+        approval_id = None
+        answers = []
+        if len(interviews):
+
+            date = arrow.get(interviews.last()['noteTimestamp'])
+
+            # find the record in FHIR
+            response = self.fhir.search("QuestionnaireResponse", {
+                "patient": f"Patient/{self.patient.patient_key}",
+                "questionnaire": f"Questionnaire/{MedicationAcceptanceQuestionnaire.FHIR_ID}",
+                "authored": f"eq{date.format('YYYY-MM-DD')}"
+            })
+
+            if response.status_code != 200:
+                raise Exception(f"FHIR Questionnaire Responses could not be fetched: {response.text} and fumage_correlation_id: {response.headers['fumage-correlation-id']}")
+
+            for entry in response.json().get('entry', []):
+                if arrow.get(entry['resource']['authored']) == date:
+                    approval_id = entry['resource']['id']
+                    for item in entry['resource']['item']:
+                        if 'answer' in item:
+                            coding_display = item['answer'][0]['valueCoding']['display'] if 'valueCoding' in item['answer'][0] else item['answer'][0]['valueString']
+                            code = item['answer'][0]['valueCoding']['code'] if 'valueCoding' in item['answer'][0] else None
+                            answers.append(f"Q: {item['text']} \n A: {coding_display}")
+                            if code == 'medcon125': # yes
+                                self.patient_approval = True 
+                            elif code == 'medcon126': # no
+                                self.patient_approval = False
+
+        return self.patient_approval, approval_id, answers
 
     def patient_education_submitted(self):
         interview = self.patient.interviews.find(PatientEducationQuestionnaire).last()
@@ -369,16 +394,11 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
                 coding = [c['code'] for c in record['medicationCodeableConcept']['coding'] if c['system'] == 'http://www.fdbhealth.com/']
                 
                 if coding and coding[0] in [list(drug.FDB)[0] for drug in self.chosen_meds]:
-                    staff = [c['staff']['key'] for c in self.patient.patient['careTeamMemberships'] if c['role']['code'] == PROVIDER_ROLE['code']]
-
                     # create Task
                     if not self.patient.tasks.filter(status='OPEN', title='New treatment follow up in one month').records:
                         self.create_fhir_task(
                             title='New treatment follow up in one month', 
-                            staff={
-                                "reference": f"Practitioner/{staff[0] if staff else self.settings['CANVAS_BOT']}",
-                                "type": "Practitioner"
-                            }, 
+                            staff=self.care_team_staff_member, 
                             label='Cove', 
                             note_text=f"{self.patient.first_name} was started on these medications: <br>" + '\n'.join(self.drug_dates), 
                             due=self.now)
@@ -410,7 +430,13 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
 
         has_diagnosis = self.has_diagnosis()
         patient_education_submitted = self.patient_education_submitted()
+        patient_approval_submitted, approval_id, approval_answers = self.patient_approval_submitted()
         self.identifiers = [i['value'] for i in self.patient.patient['externalIdentifiers'] if i['system'] == "ThirtyMadison"]
+        care_team_member = [c['staff']['key'] for c in self.patient.patient['careTeamMemberships'] if c['role']['code'] == PROVIDER_ROLE['code']]
+        self.care_team_staff_member = ({
+            "reference": f"Practitioner/{care_team_member[0]}",
+            "type": "Practitioner"
+        } if care_team_member else None)
 
         questionnaires = sorted(
             self.patient.interviews.find(PrescriptionRecommendationQuestionnaire | PatientEducationQuestionnaire | MedicationAcceptanceQuestionnaire | MigraineIntakeQuestionnaire),
@@ -425,7 +451,7 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
 
             result = self.check_if_last_prescription_committed(result)
 
-        elif has_diagnosis and self.questionnaire_matches(last_filled_questionnaire, MedicationAcceptanceQuestionnaire) and self.patient_approval_submitted(last_filled_questionnaire) is not None:
+        elif has_diagnosis and self.questionnaire_matches(last_filled_questionnaire, MedicationAcceptanceQuestionnaire) and patient_approval_submitted is not None:
             result.due_in = -1
             result.status = STATUS_DUE
             result = self.add_banner_alert(result, "Cove: Patient Active")
@@ -436,6 +462,18 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
             else:
                 result.add_narrative(f'{self.patient.first_name} did not approve the recommended prescriptions. Please review other prescription options')
                 result = self.build_interview_rec(result, PrescriptionRecommendationQuestionnaire)
+
+            if (self.field_changes.get('model_name') == 'interview' and 
+                self.field_changes.get('created') and
+                self.field_changes.get('external_id') == approval_id and
+                not self.patient.tasks.filter(status='OPEN', title='Patient Medication Response Received').records):
+                
+                self.create_fhir_task(
+                    title='Patient Medication Response Received', 
+                    staff=self.care_team_staff_member, 
+                    label='Cove', 
+                    note_text="\n\n".join(approval_answers), 
+                    due=self.now)
 
         elif has_diagnosis and self.questionnaire_matches(last_filled_questionnaire, PatientEducationQuestionnaire) and patient_education_submitted:
             result.due_in = -1
