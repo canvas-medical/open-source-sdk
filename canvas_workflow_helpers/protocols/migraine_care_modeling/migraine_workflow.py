@@ -99,6 +99,17 @@ class Metoclopramide(ValueSet):
     }
 
 PRESCRIPTION_MEDS = [Sumatriptan, Rizatriptan, Zolmitriptan, Topiramate, Propranolol, Ondansetron, OndansetronODT, Metoclopramide]
+DIETARY_SUPPLEMENTS = [
+    'medication_education_Q2_A1',
+    'medication_education_Q2_A2',
+    'medication_education_Q2_A3',
+    'medication_education_Q2_A4',
+]
+MODIFICATIONS = [
+    'medication_education_Q3_A1',
+    'medication_education_Q3_A2',
+    'medication_education_Q3_A3',
+]
 
 class MigraineCondition(ValueSet):
     VALUE_SET_NAME = "Migraine, unspecified, not intractable, without status migrainosus"
@@ -193,6 +204,10 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
                     print(drug.FDB, response['code'], drug.FDB == response['code'])
                     if response['code'] in drug.FDB:
                         self.chosen_meds.append(drug)
+                    elif response['code'] in DIETARY_SUPPLEMENTS:
+                        self.dietary_sups.add(response['value'])
+                    elif response['code'] in MODIFICATIONS:
+                        self.modifications.add(response['value'])
 
         return len(self.chosen_meds)
 
@@ -401,7 +416,7 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
                             staff=self.care_team_staff_member, 
                             label='Cove', 
                             note_text=f"{self.patient.first_name} was started on these medications: <br>" + '\n'.join(self.drug_dates), 
-                            due=self.now)
+                            due=arrow.now().shift(months=1).isoformat())
 
                     send_notification(
                         "https://webhook.site/8f236112-e28c-41df-9c76-0888de0535a1", 
@@ -427,6 +442,8 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
         self.chosen_meds = []
         self.patient_approval = None
         self.drug_dates = []
+        self.dietary_sups = set()
+        self.modifications = set()
 
         has_diagnosis = self.has_diagnosis()
         patient_education_submitted = self.patient_education_submitted()
@@ -489,7 +506,10 @@ class MigraineWorkflowRecommendations(ClinicalQualityMeasure):
                     json.dumps({
                         'patient_identifier': ",".join(self.identifiers) if self.identifiers else self.patient.patient_key,
                         'chosen medications': [drug.VALUE_SET_NAME for drug in self.chosen_meds],
+                        'dietary supplements': list(self.dietary_sups),
+                        'program and lifestyle modificatins': list(self.modifications),
                         'narrative': 'Please select the following treatments that you would like to share information with the patient via the Cove app'
+                    
                     }), 
                     {'Content-Type': 'application/json'})
                 result.add_narrative("Notification sent")
