@@ -44,10 +44,10 @@ class DepressionPrescribeRecommendations(ClinicalQualityMeasure):
 
     def in_denominator(self):
         """ Find patient with an active diagnosis for depression"""
-        diabetes_conditions = self.patient.conditions.find(Depression).filter(clinicalStatus='active')
+        conditions = self.patient.conditions.find(Depression).filter(clinicalStatus='active')
 
-        if len(diabetes_conditions):
-            self.condition_date = arrow.get(diabetes_conditions[-1]['created'])
+        if len(conditions):
+            self.condition_date = arrow.get(conditions[-1]['created'])
             return True
 
         return False
