@@ -1,7 +1,6 @@
 import json
 from typing import Optional
 
-import requests
 from canvas_workflow_kit.constants import CHANGE_TYPE
 from canvas_workflow_kit.protocol import (
     STATUS_NOT_APPLICABLE,
@@ -157,6 +156,7 @@ class UpdateProgramStatus(ClinicalQualityMeasure):
     def post_fhir_questionnaireresponse(self, status_display):
         payload = {
             'resourceType': 'QuestionnaireResponse',
+            'status': 'completed',
             'questionnaire': f'Questionnaire/{self.questionnaire_id}',
             'subject': {'reference': f"Patient/{self.patient.patient['key']}"},
             'author': {'reference': f'Practitioner/{self.practitioner_id}'},
@@ -180,7 +180,9 @@ class UpdateProgramStatus(ClinicalQualityMeasure):
         }
 
         fhir = FumageHelper(self.settings)
-        fhir.create("QuestionnaireResponse", payload)
+        response = fhir.create("QuestionnaireResponse", payload)
+        if response.status_code != 201:
+            raise Exception(f"Failed to create QuestionnaireResponse with {response.text} and correlation-id {response.headers['fumage-correlation-id']}")
 
     def compute_results(self):
         result = ProtocolResult()
