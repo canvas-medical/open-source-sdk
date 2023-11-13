@@ -1,4 +1,3 @@
-# TODO Write tests
 from canvas_workflow_kit.protocol import (
     CHANGE_TYPE,
     STATUS_DUE,
