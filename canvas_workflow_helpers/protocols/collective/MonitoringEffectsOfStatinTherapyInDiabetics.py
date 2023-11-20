@@ -1,4 +1,3 @@
-# TODO Write tests
 from typing import List, Optional
 
 import arrow
