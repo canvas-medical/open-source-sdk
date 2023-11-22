@@ -13,7 +13,7 @@ from canvas_workflow_kit.patient_recordset import (
 from canvas_workflow_kit.protocol import (
     CHANGE_TYPE,
     STATUS_SATISFIED,
-    STATUS_NOT_APPLICABLE,
+    STATUS_UNCHANGED,
     ClinicalQualityMeasure,
     ProtocolResult,
 )
@@ -123,7 +123,7 @@ class FollowupAfterSerotonergicMedicationAdjustment(ClinicalQualityMeasure):
             or self.has_taken_medications_before(CurrentMedicationValueSet)
             or not self.has_taken_medications_before(SSRIS_SNRIS)
         ):
-            result.status = STATUS_NOT_APPLICABLE
+            result.status = STATUS_UNCHANGED
             narrative = (
                 'Patient has not taken an SSRI/SNRI before or has already taken this drug.'
                 if current_medication.find(SSRIS_SNRIS)
