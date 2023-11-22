@@ -15,7 +15,7 @@ from canvas_workflow_kit.protocol import (
     CHANGE_TYPE,
     STATUS_DUE,
     STATUS_SATISFIED,
-    STATUS_NOTAPPLICABLE,
+    STATUS_UNCHANGED,
     ClinicalQualityMeasure,
     ProtocolResult,
 )
@@ -163,7 +163,7 @@ class FollowUpAfterSerotonergicMedicationInitiation(ClinicalQualityMeasure):
         result = ProtocolResult()
         current_medication = self.get_prescribed_medication()
         if not current_medication.find(SSRIS_SNRIS):
-            result.status = STATUS_NOT_APPLICABLE
+            result.status = STATUS_UNCHANGED
             narrative = 'Patient not prescribed an SSRI/SNRI.'
         elif not self.has_taken_medications_before(SSRIS_SNRIS):
             narrative = (
@@ -177,7 +177,7 @@ class FollowUpAfterSerotonergicMedicationInitiation(ClinicalQualityMeasure):
             self.upsert_task()
             self.send_webhook()
         else:
-            result.status = STATUS_NOT_APPLICABLE
+            result.status = STATUS_UNCHANGED
             narrative = (
                 'Patient has a new SSRI/SNRI prescription but has taken '
                 'this class of medications before.'
