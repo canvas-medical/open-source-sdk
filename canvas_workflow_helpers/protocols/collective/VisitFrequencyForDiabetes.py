@@ -1,4 +1,3 @@
-# TODO Write tests
 from datetime import timedelta
 from enum import Enum
 from typing import List, Optional
