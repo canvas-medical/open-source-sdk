@@ -25,6 +25,11 @@ class WeightLossProgramStatusQuestionnaire(ValueSet):
     INTERNAL = {'i2'}
 
 
+class EmptyTest(ValueSet):
+    VALUE_SET_NAME = 'Empty'
+    CPT = {}
+
+
 class TSHLaboratoryTest(ValueSet):
     """Tests for TSH (Thyroid Stimulating Hormone)"""
 
@@ -54,7 +59,7 @@ class ScreeningForComorbidities(ClinicalQualityMeasure):
             'provided there are no results for these tests from '
             'the past year.'
         )
-        version = '1.0.2'
+        version = '1.0.0'
         information = 'https://canvasmedical.com/gallery'
         identifiers = []
         types = []
@@ -112,33 +117,29 @@ class ScreeningForComorbidities(ClinicalQualityMeasure):
 
     def remainder_tasks(self, result: ProtocolResult):
         missing_tests = self.missing_tests_in_last_year()
+        hg_codes = []
         if Hba1CLaboratoryTest in missing_tests:
-            result.add_recommendation(
-                LabRecommendation(
-                    key='RECCOMEND_HBA1C_TEST',
-                    patient=self.patient,
-                    condition=Diabetes,
-                    lab=Hba1CLaboratoryTest,
-                )
-            )
+            hg_codes.append('496')
+            indication = Diabetes
+
         if TSHLaboratoryTest in missing_tests:
-            result.add_recommendation(
-                LabRecommendation(
-                    key='RECOMMEND_TSH_TEST',
-                    patient=self.patient,
-                    condition=Hyperthyroidism,
-                    lab=TSHLaboratoryTest,
-                )
-            )
+            hg_codes.append('899')
+            indication = Hyperthyroidism
+
         if UrineCortisolLaboratoryTest in missing_tests:
-            result.add_recommendation(
-                LabRecommendation(
-                    key='RECOMMEND_URINE_CORTISOL_TEST',
-                    patient=self.patient,
-                    condition=CushingsSyndrome,
-                    lab=UrineCortisolLaboratoryTest,
-                )
+            hg_codes.append('14534')
+            indication = CushingsSyndrome
+
+        result.add_recommendation(
+            LabRecommendation(
+                key='RECOMMEND_LABS',
+                patient=self.patient,
+                condition=indication,
+                context={'health_gorilla_order_codes': hg_codes},
+                title='Order missing tests',
+                lab=EmptyTest
             )
+        )
         result.add_narrative(
             (
                 'Patient needs screening for poorly controlled diabetes, '
