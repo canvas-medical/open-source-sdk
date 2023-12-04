@@ -25,7 +25,7 @@ class WeightLossProgramStatusQuestionnaire(ValueSet):
     INTERNAL = {'i2'}
 
 
-class EmptyTest(ValueSet):
+class Empty(ValueSet):
     VALUE_SET_NAME = 'Empty'
     CPT = {}
 
@@ -120,24 +120,21 @@ class ScreeningForComorbidities(ClinicalQualityMeasure):
         hg_codes = []
         if Hba1CLaboratoryTest in missing_tests:
             hg_codes.append('496')
-            indication = Diabetes
 
         if TSHLaboratoryTest in missing_tests:
             hg_codes.append('899')
-            indication = Hyperthyroidism
 
         if UrineCortisolLaboratoryTest in missing_tests:
             hg_codes.append('14534')
-            indication = CushingsSyndrome
 
         result.add_recommendation(
             LabRecommendation(
                 key='RECOMMEND_LABS',
                 patient=self.patient,
-                condition=indication,
                 context={'health_gorilla_order_codes': hg_codes},
                 title='Order missing tests',
-                lab=EmptyTest
+                condition=Empty,
+                lab=Empty
             )
         )
         result.add_narrative(
