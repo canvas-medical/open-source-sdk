@@ -56,7 +56,8 @@ class AlertForMissingIntake(ClinicalQualityMeasure):
         return [
             appointment
             for appointment in self.patient.upcoming_appointments
-            if arrow.get(appointment['startTime']) > arrow.now()
+            if arrow.get(appointment['startTime']) > arrow.now() 
+            and appointment['state']['state'] != 'CLD'
         ]
 
     def get_next_appointment(self) -> Optional[dict]:
