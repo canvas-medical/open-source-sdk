@@ -149,7 +149,8 @@ class FollowUpAfterSerotonergicMedicationInitiation(ClinicalQualityMeasure):
         return [
             appointment
             for appointment in self.patient.upcoming_appointments
-            if arrow.get(appointment['startTime']) > arrow.now()
+            if arrow.get(appointment['startTime']) > arrow.now() 
+            and appointment['state']['state'] != 'CLD'
         ]
 
     def has_appointment_within(self, time: datetime.timedelta) -> bool:
