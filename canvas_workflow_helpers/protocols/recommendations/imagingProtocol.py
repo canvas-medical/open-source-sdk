@@ -185,11 +185,14 @@ class ImagingProtocol(ClinicalQualityMeasure):
             imaging=BoneScan, #if no template with loinc code, it defaults to whatever is after "order a..." and then (cpt: #)
             title='Order a SPECT Whole body Bone', #is this gettign set to be order.display? see normalize_command_codings
             narrative='A bonescan should be ordered for this patient.',
-            context={'conditions': [[{ #condition must already exist in the patient or won't show up
-                'code': 'M8580',
-                'system': 'ICD-10',
-                'display': Osteopenia.VALUE_SET_NAME,
-            }]]}
+            context={
+                'conditions': [[{ #condition must already exist in the patient or won't show up
+                    'code': 'M8580',
+                    'system': 'ICD-10',
+                    'display': Osteopenia.VALUE_SET_NAME,
+                }]],
+                'priority': 'Urgent'  # options are Routine or Urgent
+            }
         )
         result = ProtocolResult()
         if self.in_denominator(): # Patient has been diagnosed with osteopenia
