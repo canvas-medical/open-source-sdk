@@ -35,9 +35,9 @@ class AppointmentNotification(ClinicalQualityMeasure):
 
     def get_appointment_by_note_state_event(self, _id):
         for apt in self.patient.appointments:
-            state_id = apt.get('state', {}).get('id')
-            if state_id == _id:
-                return json.loads(json.dumps(apt, default=str))
+            for state in apt.get('stateHistory', []):
+                if state.get('id') == _id:
+                    return json.loads(json.dumps(apt, default=str))
         return {}
 
     def compute_results(self):
